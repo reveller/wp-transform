@@ -7,24 +7,24 @@ Mapping of area names to latitude/longitude coordinates
 # Based on major towns, neighborhoods, and points of interest
 LOCATION_COORDS = {
     # Main Towns
-    'christiansted': ('17.7475', '-64.7011'),
-    'frederiksted': ('17.7128', '-64.8844'),
+    'christiansted': ('17.7475', '-64.7011'),  # KEEP
+    'frederiksted': ('17.7128', '-64.8844'),   # KEEP
 
     # Directional Areas
-    'east end': ('17.7644', '-64.5850'),
-    'west end': ('17.7100', '-64.8900'),
-    'north shore': ('17.7750', '-64.7500'),
-    'mid island': ('17.7300', '-64.7500'),
+    'east end': ('17.7644', '-64.5850'),       # KEEP
+    'west end': ('17.7100', '-64.8900'),       # KEEP
+    'north shore': ('17.7750', '-64.7500'),    # KEEP
+    'mid island': ('17.7300', '-64.7500'),     # KEEP
 
     # Neighborhoods/Bays
-    'gallows bay': ('17.7400', '-64.6900'),
-    'cane bay': ('17.7717', '-64.8078'),
-    'salt river': ('17.7800', '-64.7600'),
-    'sandy point': ('17.6800', '-64.9000'),
-    '5 corners': ('17.7500', '-64.7100'),
+    'gallows bay': ('17.7400', '-64.6900'),    # KEEP
+    'cane bay': ('17.7717', '-64.8078'),       # KEEP
+    'salt river': ('17.7800', '-64.7600'),     # KEEP
+    'sandy point': ('17.6800', '-64.9000'),    # KEEP
+    '5 corners': ('17.7500', '-64.7100'),      # KEEP
 
     # Points of Interest
-    'buck island': ('17.7889', '-64.6222'),
+    'buck island': ('17.7889', '-64.6222'),    
     'airport': ('17.7019', '-64.7986'),
     'frederiksted pier': ('17.7115', '-64.8845'),
     'the buccaneer': ('17.7569', '-64.6247'),
