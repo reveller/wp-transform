@@ -159,8 +159,13 @@ def transform_tags_to_ids(tags_text, unmapped_tracker=None):
         unmapped_tracker: Optional set to collect unmapped tag names
 
     Returns:
-        Formatted ID string like ",2050,2051,"
+        Formatted ID string like ",2050,2051," or empty string if no tag mappings exist
     """
+    # Check if any tag mappings exist
+    if not _NAME_ID_MAP or 'tags' not in _NAME_ID_MAP or not _NAME_ID_MAP['tags']:
+        # No tag mappings defined - return empty string
+        return ''
+
     return transform_names_to_ids(tags_text, 'tags', '|', 2040, unmapped_tracker)
 
 
@@ -217,27 +222,43 @@ def format_phone(phone):
 
 def format_images_gallery(images_field):
     """
-    Convert image gallery to pipe-separated URLs
+    Convert image gallery to GeoDirectory format
     Handles: comma-separated, array format, or already pipe-separated
+
+    Returns:
+        GeoDirectory formatted string: "URL1|||::URL2|||::URL3|||"
+        Format: URL|ID|TITLE|DESCRIPTION (ID, TITLE, DESCRIPTION left empty for imports)
     """
     if not images_field:
         return ''
-    
-    # Already pipe-separated
-    if '|' in images_field:
-        return images_field
-    
+
+    urls = []
+
+    # Already pipe-separated (single pipe from old format)
+    if '|' in images_field and '::' not in images_field:
+        urls = [u.strip() for u in images_field.split('|') if u.strip()]
     # Comma-separated URLs
-    if ',' in images_field and 'http' in images_field:
-        return images_field.replace(',', '|').replace(' ', '')
-    
+    elif ',' in images_field and 'http' in images_field:
+        urls = [u.strip() for u in images_field.split(',') if u.strip()]
     # Array format like ["url1","url2"]
-    if images_field.startswith('['):
+    elif images_field.startswith('['):
         urls = re.findall(r'https?://[^\s",\]]+', images_field)
-        return '|'.join(urls)
-    
-    # Single image
-    return images_field
+    # Already in GeoDirectory format (contains ::)
+    elif '::' in images_field:
+        return images_field
+    # Single image URL
+    elif images_field.strip():
+        urls = [images_field.strip()]
+
+    if not urls:
+        return ''
+
+    # Format as GeoDirectory expects: URL|ID|TITLE|DESCRIPTION
+    # Leave ID, TITLE, DESCRIPTION empty for new imports
+    formatted_images = ['|'.join([url, '', '', '']) for url in urls]
+
+    # Return images separated by ::
+    return '::'.join(formatted_images)
 
 def get_first_category(categories):
     """Extract first category for default_category field"""
@@ -344,13 +365,146 @@ def filter_beaver_builder_tags(content):
     if not content:
         return ''
 
-    # Remove Beaver Builder specific tags only
+    # Remove Beaver Builder specific tags (both formats):
+    # - Legacy format: <!-- fl-builder... -->
+    # - WordPress block format: <!-- wp:fl-builder/... --> and <!-- /wp:fl-builder/... -->
+    content = re.sub(r'<!--\s*/?wp:fl-builder[^>]*-->', '', content)
     content = re.sub(r'<!--\s*fl-builder[^>]*-->', '', content)
+
+    # Also handle Unicode-escaped versions (e.g., in wp:divi blocks):
+    # \u003c!\u002d\u002d wp:fl-builder... \u002d\u002d\u003e
+    content = re.sub(r'\\u003c!\\u002d\\u002d\s*/?wp:fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
+    content = re.sub(r'\\u003c!\\u002d\\u002d\s*fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
 
     # Clean up any excessive whitespace left behind
     content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
 
     return content.strip()
+
+
+def extract_jpg_urls_from_content(content):
+    """
+    Extract JPG image URLs from HTML content and format for GeoDirectory.
+    Filters out duplicate images with different resolutions, keeping only master images.
+
+    Args:
+        content: HTML/text content that may contain image links
+
+    Returns:
+        GeoDirectory formatted string: "URL1|||::URL2|||::URL3|||"
+        Format: URL|ID|TITLE|DESCRIPTION (ID, TITLE, DESCRIPTION left empty for imports)
+    """
+    if not content:
+        return ''
+
+    # Find all URLs ending in .jpg or .jpeg (case-insensitive)
+    # Matches both src="..." and href="..." attributes, plus standalone URLs
+    jpg_pattern = r'(?:src=|href=)?["\']?(https?://[^\s"\'<>]+\.jpe?g)["\']?'
+    matches = re.findall(jpg_pattern, content, re.IGNORECASE)
+
+    if not matches:
+        return ''
+
+    # Group URLs by base filename (without resolution suffix like -1024x768)
+    # Pattern: filename-WIDTHxHEIGHT.jpg
+    resolution_pattern = r'-(\d+)x(\d+)(\.jpe?g)$'
+
+    url_groups = {}  # base_url -> list of (url, width or None)
+
+    for url in matches:
+        # Check if URL has resolution suffix
+        match = re.search(resolution_pattern, url, re.IGNORECASE)
+        if match:
+            width = int(match.group(1))
+            # Remove the resolution suffix to get base URL
+            base_url = re.sub(resolution_pattern, r'\3', url, flags=re.IGNORECASE)
+            if base_url not in url_groups:
+                url_groups[base_url] = []
+            url_groups[base_url].append((url, width))
+        else:
+            # No resolution suffix - this is likely the master
+            base_url = url
+            if base_url not in url_groups:
+                url_groups[base_url] = []
+            url_groups[base_url].append((url, None))
+
+    # For each group, select the master image
+    master_urls = []
+    for base_url, variants in url_groups.items():
+        # Prefer URL without resolution suffix (width = None)
+        master_variant = None
+        for url, width in variants:
+            if width is None:
+                master_variant = url
+                break
+
+        # If no master without suffix, prefer 1440 width or largest
+        if master_variant is None:
+            # Sort by width descending, preferring 1440 if present
+            variants_sorted = sorted(variants, key=lambda x: (x[1] != 1440, -(x[1] or 0)))
+            master_variant = variants_sorted[0][0]
+
+        master_urls.append(master_variant)
+
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_urls = []
+    for url in master_urls:
+        url_lower = url.lower()
+        if url_lower not in seen:
+            seen.add(url_lower)
+            unique_urls.append(url)
+
+    # Format as GeoDirectory expects: URL|ID|TITLE|DESCRIPTION
+    # Leave ID, TITLE, DESCRIPTION empty for new imports
+    formatted_images = ['|'.join([url, '', '', '']) for url in unique_urls]
+
+    # Return images separated by ::
+    return '::'.join(formatted_images)
+
+
+def extract_youtube_urls_from_content(content):
+    """
+    Extract YouTube embed URLs from HTML content and format for GeoDirectory.
+
+    Args:
+        content: HTML/text content that may contain YouTube embeds
+
+    Returns:
+        GeoDirectory formatted string: "URL1|||::URL2|||::URL3|||"
+        Format: URL|ID|TITLE|DESCRIPTION (ID, TITLE, DESCRIPTION left empty for imports)
+    """
+    if not content:
+        return ''
+
+    # Find YouTube URLs in various formats:
+    # - youtube.com/embed/VIDEO_ID
+    # - youtube.com/watch?v=VIDEO_ID
+    # - youtu.be/VIDEO_ID
+    youtube_patterns = [
+        r'(?:https?:)?//(?:www\.)?youtube\.com/embed/([a-zA-Z0-9_-]+)',
+        r'(?:https?:)?//(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+)',
+        r'(?:https?:)?//youtu\.be/([a-zA-Z0-9_-]+)',
+    ]
+
+    video_ids = set()
+    for pattern in youtube_patterns:
+        matches = re.findall(pattern, content, re.IGNORECASE)
+        video_ids.update(matches)
+
+    if not video_ids:
+        return ''
+
+    # Convert video IDs to embed URLs
+    embed_urls = [f'https://www.youtube.com/embed/{vid}' for vid in sorted(video_ids)]
+
+    # Format as GeoDirectory expects: URL|ID|TITLE|DESCRIPTION
+    # Leave ID, TITLE, DESCRIPTION empty for new imports
+    formatted_videos = ['|'.join([url, '', '', '']) for url in embed_urls]
+
+    # Return videos separated by ::
+    return '::'.join(formatted_videos)
+
 
 def load_address_cache(cache_file='address_cache.json'):
     """Load address cache from JSON file"""
@@ -458,7 +612,7 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
             'featured_image_alignment', 'layout', 'facebook', 'twitter',
             'instagram', 'pinterest', 'youtube', 'linkedin', 'trip_advisor',
             'yelp', 'other_social_label', 'other_social_url', 'other_social_icon',
-            'enable_post_tabs', 'tab_1_description', 'post_images'
+            'enable_post_tabs', 'tab_1_description', 'youtube_url', 'youtube_urls', 'post_images'
         ]
         
         # Open output file or use stdout
@@ -575,6 +729,21 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 if filter_bb:
                     content = filter_beaver_builder_tags(content)
 
+                # Extract JPG URLs and YouTube URLs from content
+                jpg_urls_from_content = extract_jpg_urls_from_content(content)
+                youtube_urls_from_content = extract_youtube_urls_from_content(content)
+
+                # Combine gallery images with JPG URLs from content
+                # Both are already in GeoDirectory format: URL|ID|TITLE|DESCRIPTION::URL|ID|TITLE|DESCRIPTION
+                gallery_images = format_images_gallery(gallery)
+                if gallery_images and jpg_urls_from_content:
+                    # Both formatted, combine with :: separator
+                    combined_images = gallery_images + '::' + jpg_urls_from_content
+                elif jpg_urls_from_content:
+                    combined_images = jpg_urls_from_content
+                else:
+                    combined_images = gallery_images
+
                 # Build output row
                 output_row = {
                     'ID': row.get('id', ''),
@@ -629,9 +798,13 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                     # Tabs
                     'enable_post_tabs': '1' if row.get('acf_tabs_filter') else '0',
                     'tab_1_description': row.get('acf_tab_1_name', ''),
-                    
-                    # Image gallery
-                    'post_images': format_images_gallery(gallery),
+
+                    # YouTube URLs (extracted from content)
+                    'youtube_url': '',  # Single URL field (empty for now, can be populated if needed)
+                    'youtube_urls': youtube_urls_from_content,
+
+                    # Image gallery (combined from gallery fields + JPG URLs in content)
+                    'post_images': combined_images,
                 }
 
                 writer.writerow(output_row)
