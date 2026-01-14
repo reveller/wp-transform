@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Generated output files
+gd_*.csv
+*-gd_*.csv
+[0-9]-gd_*.csv
+[0-9][0-9]-gd_*.csv
+copy_images.sh
+copy-images.sh
+
+# Jennie's override/business data files
+*_revised.json
+jennie-*.json
+jennie.json
+
+# Scratch/temp files
+*.txt
+*.t
+j.j
+t.sh
+
+# Backup files
+*.backup
+*~
+
+# IDE
+.vscode/
+.idea/

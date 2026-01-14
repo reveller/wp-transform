@@ -1,0 +1,1488 @@
+[
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Places to Stay",
+        "id": 2093,
+        "slug": "stay",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Resorts + Hotels",
+        "id": 2094,
+        "slug": "resorts-hotels",
+        "parent_id": 2093,
+        "parent_name": "Places to Stay"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Vacation Rentals",
+        "id": 2095,
+        "slug": "vacation-rentals",
+        "parent_id": 2093,
+        "parent_name": "Places to Stay"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Campgrounds + Eco",
+        "id": 2096,
+        "slug": "campgrounds-eco",
+        "parent_id": 2093,
+        "parent_name": "Places to Stay"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Things to Do",
+        "id": 2097,
+        "slug": "play",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Land Activities",
+        "id": 2098,
+        "slug": "land-activities",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Water Activities",
+        "id": 2099,
+        "slug": "water-activities",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Beaches",
+        "id": 2100,
+        "slug": "beaches",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Spa + Wellness",
+        "id": 2101,
+        "slug": "spa-wellness",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Weddings + Special Events",
+        "id": 2347,
+        "slug": "weddings-special-events",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Party Rentals + Event Entertainment",
+        "id": 2347,
+        "slug": "arts-culture",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Venues and Sites",
+        "id": 2347,
+        "slug": "arts-culture",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Wedding and Event Vendors",
+        "id": 2347,
+        "slug": "arts-culture",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Arts + Culture",
+        "id": 2102,
+        "slug": "arts-culture",
+        "parent_id": 2097,
+        "parent_name": "Things to Do"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Food and Drink",
+        "id": 2103,
+        "slug": "eat",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Restaurants",
+        "id": 2104,
+        "slug": "restaurants",
+        "parent_id": 2103,
+        "parent_name": "Food and Drink"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Coffee Shops + Sweets",
+        "id": 2105,
+        "slug": "coffee-shops-sweets",
+        "parent_id": 2103,
+        "parent_name": "Food and Drink"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Markets + Farm Stands",
+        "id": 2106,
+        "slug": "markets-farm-stands",
+        "parent_id": 2103,
+        "parent_name": "Food and Drink"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Catering + Chefs",
+        "id": 2107,
+        "slug": "catering-chefs",
+        "parent_id": 2103,
+        "parent_name": "Food and Drink"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Island Life",
+        "id": 2108,
+        "slug": "island-life",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Real Estate",
+        "id": 2109,
+        "slug": "real-estate",
+        "parent_id": 2108,
+        "parent_name": "Island Life"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Relocation",
+        "id": 2110,
+        "slug": "relocation",
+        "parent_id": 2108,
+        "parent_name": "Island Life"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Medical",
+        "id": 2111,
+        "slug": "medical",
+        "parent_id": 2108,
+        "parent_name": "Island Life"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Community",
+        "id": 2112,
+        "slug": "community",
+        "parent_id": 2108,
+        "parent_name": "Island Life"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Getting Around",
+        "id": 2113,
+        "slug": "transportation",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Car Rentals",
+        "id": 2114,
+        "slug": "car-rentals",
+        "parent_id": 2113,
+        "parent_name": "Getting Around"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Airlines + Ferry",
+        "id": 2115,
+        "slug": "airlines-ferry",
+        "parent_id": 2113,
+        "parent_name": "Getting Around"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Taxis + Rideshare",
+        "id": 2116,
+        "slug": "taxis-rideshare",
+        "parent_id": 2113,
+        "parent_name": "Getting Around"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Shop Local",
+        "id": 2117,
+        "slug": "shop",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Island Jewelry",
+        "id": 2118,
+        "slug": "island-jewelry",
+        "parent_id": 2117,
+        "parent_name": "Shop Local"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Lifestyle + Gifts",
+        "id": 2119,
+        "slug": "lifestyle-gifts",
+        "parent_id": 2117,
+        "parent_name": "Shop Local"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Apparel",
+        "id": 2120,
+        "slug": "apparel",
+        "parent_id": 2117,
+        "parent_name": "Shop Local"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Boutiques",
+        "id": 2121,
+        "slug": "boutiques",
+        "parent_id": 2117,
+        "parent_name": "Shop Local"
+    },
+    {
+        "type": "category",
+        "taxonomy": "gd_listingcategory",
+        "name": "Plan",
+        "id": 2122,
+        "slug": "plan",
+        "parent_id": 0
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Guides / Blog",
+        "id": 2123,
+        "slug": "guides-blog",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Travel Tips + FAQ",
+        "id": 2124,
+        "slug": "travel-tips-faq",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Maps",
+        "id": 2125,
+        "slug": "maps",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Itineraries",
+        "id": 2126,
+        "slug": "itineraries",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Calendar",
+        "id": 2127,
+        "slug": "calendar",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Webcams",
+        "id": 2128,
+        "slug": "webcams",
+        "parent_id": 2122,
+        "parent_name": "Discover"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Christiansted",
+        "id": 2129,
+        "slug": "christiansted"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Frederiksted",
+        "id": 2130,
+        "slug": "frederiksted"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "East End",
+        "id": 2092,
+        "slug": "east-end"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "West End",
+        "id": 2131,
+        "slug": "west-end"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "North Shore",
+        "id": 2132,
+        "slug": "north-shore"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Mid Island",
+        "id": 2133,
+        "slug": "mid-island"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Beachfront",
+        "id": 2134,
+        "slug": "beachfront"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Pool",
+        "id": 2135,
+        "slug": "pool"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Restaurant",
+        "id": 2136,
+        "slug": "restaurant"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Fitness Center",
+        "id": 2137,
+        "slug": "fitness-center"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Kitchenette",
+        "id": 2138,
+        "slug": "kitchenette"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Adult Only",
+        "id": 2139,
+        "slug": "adult-only"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Family Friendly",
+        "id": 2140,
+        "slug": "family-friendly"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Pet Friendly",
+        "id": 2141,
+        "slug": "pet-friendly"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "LGBTQ+",
+        "id": 2142,
+        "slug": "lgbtq"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Local Ownership",
+        "id": 2143,
+        "slug": "local-ownership"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Meeting Space",
+        "id": 2144,
+        "slug": "meeting-space"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Wedding / Event Venue",
+        "id": 2145,
+        "slug": "wedding-event-venue"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Concierge",
+        "id": 2146,
+        "slug": "concierge"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Historic",
+        "id": 2147,
+        "slug": "historic"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Off-Street Parking",
+        "id": 2148,
+        "slug": "off-street-parking"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Accessible / ADA",
+        "id": 2149,
+        "slug": "accessible-ada"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Day Pass",
+        "id": 2150,
+        "slug": "day-pass"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "# of Rooms",
+        "id": 2151,
+        "slug": "of-rooms"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "1-2 BR",
+        "id": 2152,
+        "slug": "1-2-br"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "3-4 BR",
+        "id": 2153,
+        "slug": "3-4-br"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "5+ BR",
+        "id": 2154,
+        "slug": "5-br"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Extended Stay Option",
+        "id": 2155,
+        "slug": "extended-stay-option"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Guided Tour",
+        "id": 2156,
+        "slug": "guided-tour"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Casino",
+        "id": 2157,
+        "slug": "casino"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Horseback Riding",
+        "id": 2158,
+        "slug": "horseback-riding"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Museums",
+        "id": 2159,
+        "slug": "museums"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "History",
+        "id": 2160,
+        "slug": "history"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Adventure",
+        "id": 2161,
+        "slug": "adventure"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Culinary / Tasting",
+        "id": 2162,
+        "slug": "culinary-tasting"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Self Guided Tours",
+        "id": 2163,
+        "slug": "self-guided-tours"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Cruise Passengers",
+        "id": 2164,
+        "slug": "cruise-passengers"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Parking",
+        "id": 2165,
+        "slug": "parking"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Bathrooms",
+        "id": 2166,
+        "slug": "bathrooms"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Scenic View",
+        "id": 2167,
+        "slug": "scenic-view"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Breakfast",
+        "id": 2168,
+        "slug": "breakfast"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Brunch",
+        "id": 2169,
+        "slug": "brunch"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Lunch",
+        "id": 2170,
+        "slug": "lunch"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Dinner",
+        "id": 2171,
+        "slug": "dinner"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Cocktail Lounge",
+        "id": 2172,
+        "slug": "cocktail-lounge"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Vegan / Veg",
+        "id": 2173,
+        "slug": "vegan-veg"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Kid's Menu",
+        "id": 2174,
+        "slug": "kids-menu"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Business for Sale",
+        "id": 2175,
+        "slug": "business-for-sale"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Short Term",
+        "id": 2176,
+        "slug": "short-term"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Long Term",
+        "id": 2177,
+        "slug": "long-term"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Scuba",
+        "id": 2178,
+        "slug": "scuba"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Buck Island",
+        "id": 2179,
+        "slug": "buck-island"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Kayaking",
+        "id": 2180,
+        "slug": "kayaking"
+    },
+    {
+        "type": "tag",
+        "taxonomy": "gd_listing_tags",
+        "name": "Attractions",
+        "id": 2181,
+        "slug": "attractions"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Hotels",
+        "id": 2094,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Resorts + Hotels"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Hotels and Inns",
+        "id": 2094,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Resorts + Hotels"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Resorts",
+        "id": 2094,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Resorts + Hotels"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Small Inns",
+        "id": 2094,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Resorts + Hotels"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Vacation Rentals and Villas",
+        "id": 2095,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Vacation Rentals"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "1-2 Bedroom Rentals",
+        "id": 2095,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Vacation Rentals"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "3-4 Bedroom Rentals",
+        "id": 2095,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Vacation Rentals"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "5+ Bedroom Rentals",
+        "id": 2095,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Vacation Rentals"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Cottages",
+        "id": 2095,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Vacation Rentals"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Campgrounds",
+        "id": 2096,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Campgrounds + Eco"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Retreats",
+        "id": 2096,
+        "slug": "",
+        "parent_id": 2093,
+        "parent_name": "Campgrounds + Eco"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Adventure Tours",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Guided Tours",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Hiking and Biking",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Hiking Trails",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Golf and Tennis",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Tennis",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Family Activities",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Nightlife and Entertainment",
+        "id": 2098,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Land Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Scuba Diving",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Water Sports",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Sailing and Boat Charters",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Sport Fishing",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Island Hopping",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "St. Croix Dive Sites",
+        "id": 2099,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Water Activities"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "St. Croix Beaches",
+        "id": 2100,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Beaches"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "National Parks",
+        "id": 2100,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Beaches"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Massage and Spa",
+        "id": 2101,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Spa + Wellness"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Yoga and Fitness",
+        "id": 2101,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Spa + Wellness"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Beauty",
+        "id": 2101,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Spa + Wellness"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Art and Galleries",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Arts and Culture",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Art Thursday",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Historic Sites",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Historic Properties",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Parks and Historic Attractions",
+        "id": 2102,
+        "slug": "",
+        "parent_id": 2097,
+        "parent_name": "Arts + Culture"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Christiansted Restaurants",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "East End Restaurants",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Frederiksted Restaurants",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Mid Island Restaurants",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "North Shore Restaurants",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Food Trucks",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Craft Cocktails + Lounges",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Distilleries and Breweries",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Tasting Tours",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Food and Drink Experiences",
+        "id": 2104,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Restaurants"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Coffee + Sweets",
+        "id": 2105,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Coffee Shops + Sweets"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Farm Stands",
+        "id": 2106,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Markets + Farm Stands"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Food Shopping",
+        "id": 2106,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Markets + Farm Stands"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Catering",
+        "id": 2107,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Catering + Chefs"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Chefs",
+        "id": 2107,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Catering + Chefs"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Desserts",
+        "id": 2107,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Catering + Chefs"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Catering, Chefs, Desserts",
+        "id": 2107,
+        "slug": "",
+        "parent_id": 2103,
+        "parent_name": "Catering + Chefs"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Agents and Brokers",
+        "id": 2109,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Real Estate"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Rental Agents",
+        "id": 2109,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Real Estate"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Mortgage Lenders",
+        "id": 2109,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Real Estate"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Long Term Rentals",
+        "id": 2109,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Real Estate"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Movers and Shippers",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Education",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Cell Phones and Wifi",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Cellphones and Communications",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Home Maintenance Services",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Pet Travel",
+        "id": 2110,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Relocation"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Doctors",
+        "id": 2111,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Medical"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Emergency Care",
+        "id": 2111,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Medical"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Pharmacies",
+        "id": 2111,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Medical"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Community Organizations",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Banking",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Insurance Agents",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Professional Services",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Architects and Designers",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Pet Care",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Boaters and Cruisers",
+        "id": 2112,
+        "slug": "",
+        "parent_id": 2108,
+        "parent_name": "Community"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Taxis and Rideshares",
+        "id": 2116,
+        "slug": "",
+        "parent_id": 2113,
+        "parent_name": "Taxis + Rideshare"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Lifestyle and Gifts",
+        "id": 2119,
+        "slug": "",
+        "parent_id": 2117,
+        "parent_name": "Lifestyle + Gifts"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "St. Croix Posters",
+        "id": 2119,
+        "slug": "",
+        "parent_id": 2117,
+        "parent_name": "Lifestyle + Gifts"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Boutiques and Stores",
+        "id": 2121,
+        "slug": "",
+        "parent_id": 2117,
+        "parent_name": "Boutiques"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Blog",
+        "id": 2123,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Guides / Blog"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Cruise Ship Passengers",
+        "id": 2124,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Travel Tips + FAQ"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Climate and Weather",
+        "id": 2124,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Travel Tips + FAQ"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Wheelchair Access",
+        "id": 2124,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Travel Tips + FAQ"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Events",
+        "id": 2127,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Calendar"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Events by Month",
+        "id": 2127,
+        "slug": "",
+        "parent_id": 2122,
+        "parent_name": "Calendar"
+    },
+    {
+        "type": "subcategory",
+        "taxonomy": "gd_listingcategory",
+        "name": "Uncategorized",
+        "id": 2184,
+        "slug": "uncategorized",
+        "parent_id": 0
+    }
+]
