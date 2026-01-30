@@ -1,143 +1,325 @@
 [
     {
         "type": "neighborhood",
+        "acf_location": "Airport, Christiansted",
+        "city": "Mid Island",
+        "latitude":  "17.715658470605543",
+        "longitude": "-64.81212615966798"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Airport, Christiansted, Frederiksted",
+        "city": "Mid Island",
+        "latitude":  "17.715658470605543",
+        "longitude": "-64.81212615966798"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Christiansted, Coming Soon to Frederiksted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Christiansted, Frederiksted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Christiansted, Mid Island",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Christiansted, Island Wide",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "East End, Gallows Bay",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Frederiksted, West End",
+        "city": "Frederiksted",
+        "latitude":  "17.71361444755625",
+        "longitude": "-64.88132715225221"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Gallows Bay, Christiansted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Gallows Bay, East End",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Gallows Bay, Frederiksted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Island Wide, East End",
+        "city": "Frederiksted",
+        "latitude":  "17.71361444755625",
+        "longitude": "-64.88132715225221"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Mid Island, Gallows Bay",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "North Shore, Cane Bay",
+        "city": "North Shore",
+        "latitude":  "17.772222666013285",
+        "longitude": "-64.81081187725069"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "North Shore, Christiansted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "North Shore, Island Wide",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Salt River, North Shore",
+        "city": "North Shore",
+        "latitude":  "17.772222666013285",
+        "longitude": "-64.81081187725069"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Island Wide Delivery, Frederiksted",
+        "city": "Frederiksted",
+        "latitude":  "17.71361444755625",
+        "longitude": "-64.88132715225221"
+    },
+    {
+        "type": "neighborhood",
+        "acf_location": "Island Wide, Christiansted",
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
+    },
+    {
+        "type": "neighborhood",
         "acf_location": "Accessible by boat only",
-        "neighborhood": "buck-island"
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Airport",
-        "neighborhood": "airport"
+        "city": "Mid Island",
+        "latitude":  "17.715658470605543",
+        "longitude": "-64.81212615966798"
     },
     {
         "type": "neighborhood",
         "acf_location": "Buck Island",
-        "neighborhood": "buck-island"
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Cane Bay",
-        "neighborhood": "cane-bay"
+        "city": "North Shore",
+        "latitude":  "17.772222666013285",
+        "longitude": "-64.81081187725069"
     },
     {
         "type": "neighborhood",
         "acf_location": "Christiansted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Christiansted / 5 Corners",
-        "neighborhood": "5-corner"
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Christiansted and Frederiksted",
-        "neighborhood": ""
-    },
-    {
-        "type": "neighborhood",
-        "acf_location": "Coming Soon to Frederiksted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "East End",
-        "neighborhood": ""
+        "city": "East End",
+        "latitude": "17.753141719874513",
+        "longitude": "-64.59321498870851"
     },
     {
         "type": "neighborhood",
         "acf_location": "East End at The Buccaneer",
-        "neighborhood": ""
+        "city": "East End",
+        "latitude": "17.753141719874513",
+        "longitude": "-64.59321498870851"
     },
     {
         "type": "neighborhood",
         "acf_location": "Frederiksted",
-        "neighborhood": ""
+        "city": "Frederiksted",
+        "latitude":  "17.71361444755625",
+        "longitude": "-64.88132715225221"
     },
     {
         "type": "neighborhood",
         "acf_location": "Frederiksted Pier",
-        "neighborhood": ""
+        "city": "Frederiksted",
+        "latitude":  "17.71361444755625",
+        "longitude": "-64.88132715225221"
     },
     {
         "type": "neighborhood",
         "acf_location": "Gallows Bay",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Gallows Bay and Frederiksted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Island Wide",
-        "neighborhood": ""
+        "city": "Island Wide",
+        "latitude": "17.735279906361868",
+        "longitude": "-64.74964141845705"
     },
     {
         "type": "neighborhood",
         "acf_location": "Island Wide Delivery",
-        "neighborhood": ""
+        "city": "Island Wide",
+        "latitude": "17.735279906361868",
+        "longitude": "-64.74964141845705"
     },
     {
         "type": "neighborhood",
         "acf_location": "Island-Wide",
-        "neighborhood": ""
+        "city": "Island Wide",
+        "latitude": "17.735279906361868",
+        "longitude": "-64.74964141845705"
     },
     {
         "type": "neighborhood",
         "acf_location": "Mid Island",
-        "neighborhood": ""
+        "city": "Mid Island",
+        "latitude":  "17.715658470605543",
+        "longitude": "-64.81212615966798"
     },
     {
         "type": "neighborhood",
         "acf_location": "North Shore",
-        "neighborhood": ""
+        "city": "North Shore",
+        "latitude":  "17.772222666013285",
+        "longitude": "-64.81081187725069"
     },
     {
         "type": "neighborhood",
         "acf_location": "North Shore and East End",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Office Location: Christiansted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Office Location: Gallows Bay",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Office Locations: Frederiksted and Christiansted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Office Locations: Gallows Bay and Frederiksted",
-        "neighborhood": ""
+        "city": "Christiansted",
+        "latitude":  "17.746152526796575",
+        "longitude": "-64.70518112182619"
     },
     {
         "type": "neighborhood",
         "acf_location": "Salt River",
-        "neighborhood": ""
+        "city": "North Shore",
+        "latitude":  "17.772222666013285",
+        "longitude": "-64.81081187725069"
     },
     {
         "type": "neighborhood",
         "acf_location": "Sandy Point",
-        "neighborhood": ""
+        "city": "West End",
+        "latitude": "17.74116591816669",
+        "longitude": "-64.85830307006837"
     },
     {
         "type": "neighborhood",
         "acf_location": "US Virgin Islands and Stateside",
-        "neighborhood": ""
+        "city": "Island Wide",
+        "latitude": "17.735279906361868",
+        "longitude": "-64.74964141845705"
     },
     {
         "type": "neighborhood",
         "acf_location": "West End",
-        "neighborhood": ""
+        "city": "West End",
+        "latitude": "17.74116591816669",
+        "longitude": "-64.85830307006837"
     }
 ]
 

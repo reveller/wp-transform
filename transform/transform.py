@@ -75,7 +75,7 @@ for acf_name, gd_name in ACF_TO_GD_FIELD_MAP.items():
 
 import json
 from pathlib import Path
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, List
 
 # ============================================================================
 # GENERIC MAPPING SYSTEM
@@ -242,6 +242,10 @@ _NAME_ID_MAP: Dict[str, Any] | None = None
 # Keep reference to neighborhood mapping for backward compatibility
 _LOCATION_HOOD_MAP: Dict[str, Any] | None = None
 
+# Full location data storage (neighborhood, city, latitude, longitude)
+_LOCATION_DATA: Dict[str, Dict[str, Any]] = {}
+_LOCATION_VALIDATION_WARNINGS: List[str] = []
+
 
 def load_name_id_map(json_path: str | Path) -> None:
     """
@@ -262,15 +266,65 @@ def load_location_hood_map(json_path: str | Path) -> None:
     """
     Load neighborhoods mapping file.
 
-    DEPRECATED: This is a backward compatibility wrapper.
-    New code should use: load_mapping('neighborhoods')
+    Also loads full location data (city, latitude, longitude) and validates entries.
+
+    Validation rules:
+    - If latitude is specified, longitude must also be specified (and vice versa)
+    - If neighborhood is specified, city must also be specified
+    - city alone is acceptable
 
     Args:
         json_path: Path to neighborhoods.json file
     """
-    global _LOCATION_HOOD_MAP
+    global _LOCATION_HOOD_MAP, _LOCATION_DATA, _LOCATION_VALIDATION_WARNINGS
     load_mapping('neighborhoods', json_path)
     _LOCATION_HOOD_MAP = _MAPPINGS.get('neighborhoods')
+
+    # Load full location data and validate
+    _LOCATION_DATA = {}
+    _LOCATION_VALIDATION_WARNINGS = []
+
+    json_path = Path(json_path)
+    if not json_path.exists():
+        return
+
+    with json_path.open("r", encoding="utf-8") as f:
+        data_array = json.load(f)
+
+    for item in data_array:
+        if item.get('type') != 'neighborhood':
+            continue
+
+        acf_location = item.get('acf_location')
+        if not acf_location:
+            continue
+
+        # Extract all location fields
+        location_data = {
+            'neighborhood': item.get('neighborhood', ''),
+            'city': item.get('city', ''),
+            'latitude': item.get('latitude', ''),
+            'longitude': item.get('longitude', ''),
+        }
+
+        # Validate: latitude and longitude must both be present or both absent
+        has_lat = bool(location_data['latitude'])
+        has_lng = bool(location_data['longitude'])
+        if has_lat != has_lng:
+            missing = 'longitude' if has_lat else 'latitude'
+            _LOCATION_VALIDATION_WARNINGS.append(
+                f"'{acf_location}': has {'latitude' if has_lat else 'longitude'} but missing {missing}"
+            )
+
+        # Validate: if neighborhood is specified, city must also be specified
+        has_neighborhood = bool(location_data['neighborhood'])
+        has_city = bool(location_data['city'])
+        if has_neighborhood and not has_city:
+            _LOCATION_VALIDATION_WARNINGS.append(
+                f"'{acf_location}': has neighborhood '{location_data['neighborhood']}' but missing city"
+            )
+
+        _LOCATION_DATA[acf_location] = location_data
 
 
 def get_id_by_name(name: str, map_type: str = "categories") -> int:
@@ -323,6 +377,186 @@ def get_neighborhood_by_location(location: str, default: str = '') -> str:
         get_neighborhood_by_location('Unknown')   # Returns ''
     """
     return get_mapping_value('neighborhoods', 'locations', location, default=default)
+
+
+def get_location_data(location: str) -> Dict[str, str]:
+    """
+    Get all location data for an ACF location value.
+
+    Returns a dictionary with neighborhood, city, latitude, and longitude
+    from the neighborhoods.json mapping file.
+
+    Args:
+        location: ACF location value (e.g., 'Cane Bay', 'Christiansted')
+
+    Returns:
+        Dictionary with keys: neighborhood, city, latitude, longitude
+        All values default to empty string if not found
+
+    Example:
+        get_location_data('Cane Bay')
+        # Returns {'neighborhood': 'cane-bay', 'city': '', 'latitude': '', 'longitude': ''}
+
+        get_location_data('Accessible by boat only')
+        # Returns {'neighborhood': 'buck-island', 'city': 'Christiansted',
+        #          'latitude': '17.0000', 'longitude': '-64.0000'}
+    """
+    default_data = {
+        'neighborhood': '',
+        'city': '',
+        'latitude': '',
+        'longitude': '',
+    }
+
+    if not location or location not in _LOCATION_DATA:
+        return default_data
+
+    return _LOCATION_DATA.get(location, default_data).copy()
+
+
+def get_location_validation_warnings() -> List[str]:
+    """
+    Get validation warnings from neighborhood mapping.
+
+    Returns:
+        List of validation warning messages
+    """
+    return _LOCATION_VALIDATION_WARNINGS.copy()
+
+
+# ============================================================================
+# CPT-BASED TAXONOMY SYSTEM
+# ============================================================================
+# New nested taxonomy structure with Custom Post Types (CPTs)
+# Each CPT has categories with aliases, and tags
+
+# Module-level cache for CPT taxonomy
+_CPT_TAXONOMY: Dict[str, Any] | None = None
+_CPT_CATEGORY_LOOKUP: Dict[str, Dict[str, Any]] = {}  # name/alias -> {id, post_type}
+_CPT_TAG_LOOKUP: Dict[str, int] = {}  # tag name -> id
+
+
+def load_cpt_taxonomy(json_path: str | Path = 'gd-taxonomy-cpts.json') -> None:
+    """
+    Load the CPT-based taxonomy structure.
+
+    Parses the nested JSON structure and builds flat lookup tables for
+    fast category/alias and tag lookups.
+
+    Args:
+        json_path: Path to gd-taxonomy-cpts.json file
+
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        json.JSONDecodeError: If file contains invalid JSON
+    """
+    global _CPT_TAXONOMY, _CPT_CATEGORY_LOOKUP, _CPT_TAG_LOOKUP
+
+    if _CPT_TAXONOMY is not None:
+        return  # Already loaded
+
+    path = Path(json_path)
+    if not path.exists():
+        raise FileNotFoundError(f"CPT taxonomy file not found: {json_path}")
+
+    with path.open('r', encoding='utf-8') as f:
+        _CPT_TAXONOMY = json.load(f)
+
+    # Build category lookup: name/alias -> {id, post_type, cpt_name}
+    _CPT_CATEGORY_LOOKUP = {}
+
+    for cpt in _CPT_TAXONOMY.get('cpts', []):
+        cpt_name = cpt.get('cpt', '')
+        post_type = cpt.get('post_type', 'gd_listing')
+
+        for category in cpt.get('categories', []):
+            cat_id = category.get('id')
+            cat_name = category.get('name', '')
+
+            info = {
+                'id': cat_id,
+                'post_type': post_type,
+                'cpt_name': cpt_name,
+                'slug': category.get('slug', '')
+            }
+
+            # Add primary category name
+            if cat_name and cat_name not in _CPT_CATEGORY_LOOKUP:
+                _CPT_CATEGORY_LOOKUP[cat_name] = info
+
+            # Add aliases (they map to the same category)
+            for alias in category.get('aliases', []):
+                if alias and alias not in _CPT_CATEGORY_LOOKUP:
+                    _CPT_CATEGORY_LOOKUP[alias] = info
+
+    # Build tag lookup: name -> id
+    _CPT_TAG_LOOKUP = {}
+    for tag in _CPT_TAXONOMY.get('global_tags', []):
+        tag_name = tag.get('name', '')
+        tag_id = tag.get('id')
+        if tag_name and tag_id:
+            _CPT_TAG_LOOKUP[tag_name] = tag_id
+
+    print(f"   Loaded CPT taxonomy: {len(_CPT_TAXONOMY.get('cpts', []))} CPTs, "
+          f"{len(_CPT_CATEGORY_LOOKUP)} categories/aliases, "
+          f"{len(_CPT_TAG_LOOKUP)} tags", file=sys.stderr)
+
+
+def get_category_info(name: str) -> Dict[str, Any] | None:
+    """
+    Get category info for a name (or alias).
+
+    Args:
+        name: Category name or alias to look up
+
+    Returns:
+        Dict with {id, post_type, cpt_name, slug} or None if not found
+    """
+    if _CPT_TAXONOMY is None:
+        raise RuntimeError("CPT taxonomy not loaded. Call load_cpt_taxonomy() first.")
+
+    # Try exact match
+    if name in _CPT_CATEGORY_LOOKUP:
+        return _CPT_CATEGORY_LOOKUP[name]
+
+    # Try case-insensitive match
+    name_lower = name.lower()
+    for key, value in _CPT_CATEGORY_LOOKUP.items():
+        if key.lower() == name_lower:
+            return value
+
+    return None
+
+
+def get_tag_id(name: str) -> int | None:
+    """
+    Get tag ID for a tag name.
+
+    Args:
+        name: Tag name to look up
+
+    Returns:
+        Tag ID or None if not found
+    """
+    if _CPT_TAXONOMY is None:
+        raise RuntimeError("CPT taxonomy not loaded. Call load_cpt_taxonomy() first.")
+
+    # Try exact match
+    if name in _CPT_TAG_LOOKUP:
+        return _CPT_TAG_LOOKUP[name]
+
+    # Try case-insensitive match
+    name_lower = name.lower()
+    for key, value in _CPT_TAG_LOOKUP.items():
+        if key.lower() == name_lower:
+            return value
+
+    return None
+
+
+def get_cpt_taxonomy_loaded() -> bool:
+    """Check if CPT taxonomy has been loaded."""
+    return _CPT_TAXONOMY is not None
 
 
 # ============================================================================
@@ -1185,73 +1419,66 @@ def get_category_with_parent(name, map_type='categories'):
 
 def transform_categories_to_ids(categories_text, unmapped_tracker=None):
     """
-    Transform category names to GeoDirectory category IDs.
+    Transform category names to GeoDirectory category IDs and determine post_type.
 
-    For subcategories, includes both parent and subcategory IDs.
-    Example: "Hotels" → ",2093,2094," (Places to Stay + Resorts + Hotels)
+    Uses the CPT-based taxonomy structure. Each category maps to a single ID
+    and determines the post_type based on which CPT the category belongs to.
+
+    Example: "Hotels" → (",2094,", "gd_placestostay")
 
     Fallback logic:
-    1. Try to find category in categories map
-    2. If not found, try to find matching tag name in tags map
-    3. If still not found, use Uncategorized (ID 2184)
+    1. Try to find category in CPT taxonomy (categories + aliases)
+    2. If not found, use Uncategorized (ID 2184) with default post_type
 
     Args:
         categories_text: Category names (comma or pipe-separated)
         unmapped_tracker: Optional set to collect unmapped category names
 
     Returns:
-        Formatted ID string like ",2093,2094," (parent,child)
+        Tuple of (category_ids_string, post_type)
+        - category_ids_string: Formatted ID string like ",2094," (single category)
+        - post_type: GeoDirectory post type (e.g., "gd_placestostay")
     """
     if not categories_text or not categories_text.strip():
-        return ''
+        return ('', 'gd_listing')
 
     # Split on pipe or comma
     names = re.split(r'[|,]', categories_text)
 
-    # Look up IDs with fallback logic
-    ids = []
-    seen_ids = set()
+    # Look up first category to determine post_type
+    post_type = 'gd_listing'  # Default fallback
+    cat_id = None
 
     for name in names:
         name = name.strip()
         if not name:
             continue
 
-        # Try to find in categories (case-insensitive)
-        cat_id, parent_id = get_category_with_parent(name, 'categories')
+        # Try to find in CPT taxonomy
+        cat_info = get_category_info(name)
 
-        if cat_id is None:
+        if cat_info is None:
             # Try title case
-            cat_id, parent_id = get_category_with_parent(name.title(), 'categories')
+            cat_info = get_category_info(name.title())
 
-        if cat_id is None:
-            # Category not found - try to find matching tag
-            cat_id, parent_id = get_category_with_parent(name, 'tags')
-            if cat_id is None:
-                cat_id, parent_id = get_category_with_parent(name.title(), 'tags')
+        if cat_info:
+            cat_id = cat_info['id']
+            post_type = cat_info['post_type']
+            break  # Use first matching category
 
-        if cat_id is None:
-            # Neither category nor tag found - use Uncategorized
-            cat_id = 2184
-            parent_id = None
-            if unmapped_tracker is not None:
-                unmapped_tracker.add(name)
+        # Track unmapped
+        if unmapped_tracker is not None:
+            unmapped_tracker.add(name)
 
-        # Add parent first, then category (if parent exists)
-        if parent_id and parent_id not in seen_ids:
-            ids.append(parent_id)
-            seen_ids.add(parent_id)
+    # If no category found, use Uncategorized
+    if cat_id is None:
+        cat_id = 2184
+        post_type = 'gd_listing'  # Default for uncategorized
 
-        # Add the category itself
-        if cat_id not in seen_ids:
-            ids.append(cat_id)
-            seen_ids.add(cat_id)
+    # Format as ",ID,"
+    category_ids = f',{cat_id},'
 
-    if not ids:
-        return ''
-
-    # Format as ",ID1,ID2,"
-    return ',' + ','.join(str(id_val) for id_val in ids) + ','
+    return (category_ids, post_type)
 
 
 def transform_tags_to_ids(tags_text, unmapped_tracker=None):
@@ -1767,10 +1994,10 @@ def load_address_cache(cache_file='address_cache.json'):
 
 def transform_csv(input_file, output_file, test_mode=False, category_filter=None, tags_filter=None,
                   layouts_filter=None, exclude_categories=None, exclude_tags=None,
-                  default_lat=None, default_lng=None, skip_geocoding=False,
-                  use_address_cache=False, filter_bb=False, enable_default_address=False,
-                  image_script=None, clean_tab_contents=False, include_filter=None, exclude_filter=None,
-                  entries_per_file=None, override_files=None, pull_tabs=False):
+                  skip_geocoding=False, use_address_cache=False, filter_bb=False,
+                  enable_default_address=False, image_script=None, clean_tab_contents=False,
+                  include_filter=None, exclude_filter=None, entries_per_file=None,
+                  override_files=None, pull_tabs=False):
     """
     Transform ACF CSV to GeoDirectory format
 
@@ -1783,9 +2010,7 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         layouts_filter: Comma-separated layout names to filter by (include only)
         exclude_categories: Comma-separated category names to exclude
         exclude_tags: Comma-separated tags to exclude
-        default_lat: Default latitude for all records (prevents geocoding)
-        default_lng: Default longitude for all records (prevents geocoding)
-        skip_geocoding: If True, uses St. Croix center coordinates
+        skip_geocoding: If True, uses St. Croix center coordinates (fallback if no mapping)
         use_address_cache: If True, loads addresses from address_cache.json
         filter_bb: If True, filters out Beaver Builder tags from content
         enable_default_address: If True, uses default address when street is empty
@@ -1859,14 +2084,6 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
             print(f"❌ Error parsing JSON in override file: {e}", file=sys.stderr)
             sys.exit(1)
 
-    # Determine geocoding mode
-    # If --lat/--lng provided, use those for all records
-    # If --skip-geocoding, use St. Croix center for all records
-    # Otherwise, look up coordinates per location
-    use_fixed_coords = default_lat or default_lng or skip_geocoding
-    fixed_lat = default_lat if default_lat else ('17.7478' if skip_geocoding else '')
-    fixed_lng = default_lng if default_lng else ('-64.7059' if skip_geocoding else '')
-
     # Determine if writing to stdout
     use_stdout = output_file is None or output_file == '-'
 
@@ -1889,10 +2106,7 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         print(f"   Exclude: Categories = {', '.join(exclude_category_list)}", file=sys.stderr)
     if exclude_tags_list:
         print(f"   Exclude: Tags = {', '.join(exclude_tags_list)}", file=sys.stderr)
-    if use_fixed_coords:
-        print(f"   Coords: {fixed_lat}, {fixed_lng} (all records)", file=sys.stderr)
-    else:
-        print(f"   Coords: Location-based lookup (prevents geocoding)", file=sys.stderr)
+    print(f"   Coords: neighborhoods.json mapping → geocoding → defaults", file=sys.stderr)
     if filter_bb:
         print(f"   Content: Beaver Builder tags will be filtered", file=sys.stderr)
     if enable_default_address:
@@ -1960,9 +2174,10 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
             row_count = 0
             processed_count = 0
 
-            # Track unmapped categories/tags for reporting
+            # Track unmapped categories/tags/locations for reporting
             unmapped_categories = set()
             unmapped_tags = set()
+            unmapped_locations = set()
 
             for row in reader:
                 row_count += 1
@@ -2089,27 +2304,39 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 tags = row.get('Tags', '')
 
                 # Transform categories and tags to IDs
-                post_category_ids = transform_categories_to_ids(categories, unmapped_categories)
+                post_category_ids, post_type = transform_categories_to_ids(categories, unmapped_categories)
                 post_tags_ids = transform_tags_to_ids(tags, unmapped_tags)
                 default_category_id = get_first_category_id(post_category_ids)
 
-                # Get location-based data (coordinates and neighborhood)
+                # Get location-based data (coordinates, neighborhood, city)
                 location_name = row.get('acf_location', '').strip()
 
-                if use_fixed_coords:
-                    # Use fixed coordinates for all records
-                    lat = fixed_lat
-                    lng = fixed_lng
+                # Track unmapped locations for warning report
+                if location_name and location_name not in _LOCATION_DATA:
+                    unmapped_locations.add(location_name)
+
+                # Get full location data from neighborhoods.json mapping
+                # Priority: mapping (highest) > command-line args > geocoding > defaults
+                location_data = get_location_data(location_name)
+                neighborhood_slug = location_data['neighborhood']
+                mapped_city = location_data['city']
+                mapped_lat = location_data['latitude']
+                mapped_lng = location_data['longitude']
+
+                if mapped_lat and mapped_lng:
+                    # HIGHEST PRIORITY: Use coordinates from neighborhoods.json mapping
+                    lat = mapped_lat
+                    lng = mapped_lng
+                elif skip_geocoding:
+                    # Skip geocoding, use default St. Croix center
+                    lat, lng = get_default_coordinates()
                 else:
-                    # Look up coordinates based on acf_location
+                    # Look up coordinates via geocoding service
                     lat, lng = get_coordinates(location_name)
 
                     # If location not found or empty, use default St. Croix center
                     if not lat or not lng:
                         lat, lng = get_default_coordinates()
-
-                # Look up neighborhood slug from location name
-                neighborhood_slug = get_neighborhood_by_location(location_name, default='')
 
                 # Get street address from cache if available (keyed by business name)
                 business_name = row.get('Title', '').strip()
@@ -2206,7 +2433,7 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                     'post_content': content,
                     'post_status': row.get('Status', 'publish'),
                     'post_author': row.get('Author ID', '1'),
-                    'post_type': 'gd_listing',  # Change if using different GD post type
+                    'post_type': post_type,  # Dynamic based on category's CPT
                     'post_date': format_datetime(row.get('Date', '')),
                     'post_modified': format_datetime(row.get('Post Modified Date', '')),
                     'post_tags': post_tags_ids,
@@ -2217,7 +2444,7 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                     # Location fields (geographic)
                     'street': street_address,
                     'street2': '',
-                    'city': '',
+                    'city': mapped_city,
                     'neighbourhood': neighborhood_slug,
                     'region': 'United States Virgin Islands',
                     'country': 'United States',
@@ -2300,11 +2527,16 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
     else:
         print(f"   Rows processed: {processed_count}", file=sys.stderr)
 
-    # Report unmapped categories and tags
+    # Report unmapped categories, tags, and locations
     if unmapped_categories:
         print(f"   ⚠️  Unmapped categories ({len(unmapped_categories)}): {', '.join(sorted(unmapped_categories))}", file=sys.stderr)
     if unmapped_tags:
         print(f"   ⚠️  Unmapped tags ({len(unmapped_tags)}): {', '.join(sorted(unmapped_tags))}", file=sys.stderr)
+    if unmapped_locations:
+        print(f"   ⚠️  Unmapped locations ({len(unmapped_locations)}):", file=sys.stderr)
+        print(f"      Add entries to neighborhoods.json for these acf_location values:", file=sys.stderr)
+        for loc in sorted(unmapped_locations):
+            print(f"        - {loc}", file=sys.stderr)
 
     if not use_stdout:
         if entries_per_file and len(output_files_created) > 1:
@@ -2341,7 +2573,7 @@ def display_field_mappings():
     print(f"{'Content':<30} {'post_content':<25} {'':<25}")
     print(f"{'Status':<30} {'post_status':<25} {'':<25}")
     print(f"{'Author ID':<30} {'post_author':<25} {'Default: 1':<25}")
-    print(f"{'(hardcoded)':<30} {'post_type':<25} {'gd_listing':<25}")
+    print(f"{'Categories':<30} {'post_type':<25} {'Dynamic from CPT':<25}")
     print(f"{'Date':<30} {'post_date':<25} {'':<25}")
     print(f"{'Post Modified Date':<30} {'post_modified':<25} {'':<25}")
     print(f"{'Tags':<30} {'post_tags':<25} {'Text names → IDs':<25}")
@@ -2431,25 +2663,25 @@ def display_field_mappings():
 
     # Display category and tag ID mappings
     print("\n" + "="*80)
-    print("CATEGORY AND TAG ID MAPPINGS")
+    print("CPT-BASED CATEGORY AND TAG MAPPINGS")
     print("="*80)
-    print(f"Mapping file: gd-taxonomy-map.json")
+    print(f"Mapping file: gd-taxonomy-cpts.json")
     print(f"Fallback ID for unmapped items: 2184 (Uncategorized)")
-    print(f"Output format: Quoted with leading/trailing commas (e.g., ',2041,2042,')\n")
+    print(f"Output format: Single category ID with leading/trailing commas (e.g., ',2094,')\n")
 
-    print("Available Category Mappings:")
-    if 'taxonomy' in _MAPPINGS and 'categories' in _MAPPINGS['taxonomy']:
-        for name, id_val in sorted(_MAPPINGS['taxonomy']['categories'].items()):
-            print(f"  {name:<30} → {id_val}")
+    print("Available Category/Alias Mappings:")
+    if _CPT_CATEGORY_LOOKUP:
+        for name, info in sorted(_CPT_CATEGORY_LOOKUP.items()):
+            print(f"  {name:<40} → {info['id']:<6} ({info['post_type']})")
     else:
         print("  (No category mappings loaded)")
 
     print("\nAvailable Tag Mappings:")
-    if 'taxonomy' in _MAPPINGS and 'tags' in _MAPPINGS['taxonomy']:
-        for name, id_val in sorted(_MAPPINGS['taxonomy']['tags'].items()):
-            print(f"  {name:<30} → {id_val}")
+    if _CPT_TAG_LOOKUP:
+        for name, id_val in sorted(_CPT_TAG_LOOKUP.items()):
+            print(f"  {name:<40} → {id_val}")
     else:
-        print("  (No tag mappings - all tags will use their names directly)")
+        print("  (No tag mappings loaded)")
 
     print("="*80)
     print()
@@ -2459,28 +2691,53 @@ def display_field_mappings():
     print("NEIGHBORHOOD MAPPINGS")
     print("="*80)
     print(f"Mapping file: neighborhoods.json")
-    print(f"Maps ACF location values to GeoDirectory neighborhood slugs")
-    print(f"Used to populate the 'neighbourhood' field in output\n")
+    print(f"Maps ACF location values to GeoDirectory location fields")
+    print(f"Used to populate: neighbourhood, city, latitude, longitude")
+    print()
+    print("PRIORITY (highest to lowest):")
+    print("  1. neighborhoods.json mapping  - OVERRIDES all other sources")
+    print("  2. Geocoding service lookup")
+    print("  3. Default coordinates (St. Croix center)")
+    print()
+    print("IMPORTANT: Every acf_location value in the source CSV should have")
+    print("           a corresponding entry in neighborhoods.json")
+    print()
 
-    print(f"{'ACF Location':<40} {'Neighborhood Slug':<30}")
-    print("-"*80)
+    # Check for validation warnings first
+    warnings = get_location_validation_warnings()
+    if warnings:
+        print("⚠️  VALIDATION WARNINGS:")
+        for warning in warnings:
+            print(f"   {warning}")
+        print()
 
-    if 'neighborhoods' in _MAPPINGS and 'locations' in _MAPPINGS['neighborhoods']:
-        locations_map = _MAPPINGS['neighborhoods']['locations']
+    print(f"{'ACF Location':<35} {'Neighborhood':<20} {'City':<15} {'Lat/Lng':<20}")
+    print("-"*90)
+
+    if _LOCATION_DATA:
         # Sort by location name
-        for location in sorted(locations_map.keys()):
-            slug = locations_map[location]
-            # Show empty slugs as "(empty)" for visibility
-            display_slug = slug if slug else "(empty)"
-            print(f"{location:<40} {display_slug:<30}")
+        for location in sorted(_LOCATION_DATA.keys()):
+            data = _LOCATION_DATA[location]
+            neighborhood = data['neighborhood'] if data['neighborhood'] else "(empty)"
+            city = data['city'] if data['city'] else ""
+            lat = data['latitude']
+            lng = data['longitude']
+            coords = f"{lat}, {lng}" if lat and lng else ""
+            print(f"{location:<35} {neighborhood:<20} {city:<15} {coords:<20}")
 
-        # Count how many have values vs empty
-        total = len(locations_map)
-        with_values = sum(1 for v in locations_map.values() if v)
-        empty = total - with_values
+        # Count statistics
+        total = len(_LOCATION_DATA)
+        with_neighborhood = sum(1 for d in _LOCATION_DATA.values() if d['neighborhood'])
+        with_city = sum(1 for d in _LOCATION_DATA.values() if d['city'])
+        with_coords = sum(1 for d in _LOCATION_DATA.values() if d['latitude'] and d['longitude'])
+        empty = sum(1 for d in _LOCATION_DATA.values() if not d['neighborhood'] and not d['city'])
 
-        print("-"*80)
-        print(f"Total locations: {total} ({with_values} mapped, {empty} empty)")
+        print("-"*90)
+        print(f"Total locations: {total}")
+        print(f"  With neighborhood: {with_neighborhood}")
+        print(f"  With city: {with_city}")
+        print(f"  With coordinates: {with_coords}")
+        print(f"  Empty mappings: {empty}")
     else:
         print("  (No neighborhood mappings loaded)")
 
@@ -2623,16 +2880,6 @@ def main():
         help='Use St. Croix center coordinates (prevents OpenStreetMap geocoding errors)'
     )
     parser.add_argument(
-        '--lat',
-        type=str,
-        help='Default latitude for all records (overrides --skip-geocoding)'
-    )
-    parser.add_argument(
-        '--lng',
-        type=str,
-        help='Default longitude for all records (overrides --skip-geocoding)'
-    )
-    parser.add_argument(
         '--use-address-cache',
         action='store_true',
         help='Load street addresses from address_cache.json file'
@@ -2706,10 +2953,10 @@ def main():
     if args.include and args.exclude:
         parser.error("--include and --exclude cannot be used together")
 
-    # Load the Categories and Tags mapping first (needed for --mapping display)
-    load_name_id_map("gd-taxonomy-map.json")
+    # Load the CPT-based taxonomy (categories, aliases, tags)
+    load_cpt_taxonomy("gd-taxonomy-cpts.json")
 
-    # Load the location to neighborhood mapping first (needed for --mapping display)
+    # Load the location to neighborhood mapping
     load_location_hood_map("neighborhoods.json")
 
     # Handle info/list flags (mutually exclusive with transformation)
@@ -2753,8 +3000,6 @@ def main():
             layouts_filter=args.layouts,
             exclude_categories=args.exclude_categories,
             exclude_tags=args.exclude_tags,
-            default_lat=args.lat,
-            default_lng=args.lng,
             skip_geocoding=args.skip_geocoding,
             use_address_cache=args.use_address_cache,
             filter_bb=args.filter_bb,
