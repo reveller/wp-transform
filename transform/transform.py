@@ -2561,6 +2561,70 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
 
 def display_field_mappings():
     """Display ACF to GeoDirectory field mappings in a table format"""
+
+    # Workflow visualization
+    print("\n" + "="*80)
+    print("TRANSFORM WORKFLOW")
+    print("="*80)
+    print("""
+Transform Pipeline
+│
+├── 1. LOAD CONFIGURATION
+│   ├── gd-taxonomy-cpts.json ─── CPTs, categories, aliases, tags
+│   ├── neighborhoods.json ────── Location → city, lat/lng, neighborhood
+│   ├── address_cache.json ────── Business name → street address (optional)
+│   └── override files ─────────── Field overrides per listing (optional)
+│
+├── 2. READ INPUT
+│   ├── Read ACF CSV file
+│   └── Apply filters
+│       ├── --category ─────────── Include only these categories
+│       ├── --tags ─────────────── Include only these tags
+│       ├── --layouts ──────────── Include only these layouts
+│       ├── --include ──────────── Include only these post titles
+│       └── --exclude ──────────── Exclude these post titles
+│
+├── 3. TRANSFORM EACH ROW
+│   │
+│   ├── Core Fields
+│   │   └── id, title, content, status, dates → direct mapping
+│   │
+│   ├── Taxonomy Resolution
+│   │   ├── Categories → CPT type + category IDs
+│   │   └── Tags → tag IDs
+│   │
+│   ├── Location Resolution (priority order)
+│   │   ├── 1. neighborhoods.json ── city, lat/lng, neighborhood (OVERRIDE)
+│   │   ├── 2. Geocoding service ─── lat/lng lookup by location name
+│   │   └── 3. Default coordinates ─ St. Croix center (17.7478, -64.7059)
+│   │
+│   ├── Contact Fields
+│   │   ├── Phone ──────────────── Format: 340-555-1234
+│   │   ├── Website ────────────── URL cleaning & validation
+│   │   └── Email ──────────────── Direct mapping
+│   │
+│   ├── Social Media
+│   │   └── Username/URL → full platform URL
+│   │
+│   ├── Images
+│   │   ├── Featured image
+│   │   ├── Gallery images ─────── Pipe-separated URLs
+│   │   ├── Content images ─────── Extract JPGs from HTML
+│   │   └── Deduplication ──────── Remove duplicate URLs
+│   │
+│   └── Tabs (Beaver Builder)
+│       └── Extract up to 5 tabs from content HTML
+│
+└── 4. WRITE OUTPUT
+    ├── GeoDirectory CSV file(s)
+    ├── Image copy script (optional)
+    └── Report
+        ├── Unmapped categories
+        ├── Unmapped tags
+        └── Unmapped locations
+""")
+    print("="*80)
+
     print("\n" + "="*80)
     print("ACF TO GEODIRECTORY FIELD MAPPINGS")
     print("="*80)
