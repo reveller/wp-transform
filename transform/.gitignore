@@ -20,6 +20,13 @@ copy-images.sh
 jennie-*.json
 jennie.json
 
+# Business data files (never commit)
+acf-full-export.csv
+Events_Signature-Events_FINAL.json
+listing-ids.json
+image-inventory.json
+address_cache.json
+
 # Scratch/temp files
 *.txt
 *.t
