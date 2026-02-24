@@ -2,20 +2,23 @@
 /**
  * GeoDirectory Listing Audit Script
  *
- * Compares a GeoDirectory import CSV against live listings on the site.
+ * Compares GeoDirectory import CSV(s) against live listings on the site.
  * Keys off post_title to identify which entries exist and which are missing.
+ * When multiple CSV files are provided, also reports duplicate post_titles
+ * across files.
  *
  * Usage:
- *   1. Upload this file and the CSV to WordPress root (or transform dir)
+ *   1. Upload this file and the CSV(s) to WordPress root (or transform dir)
  *   2. Run via WP-CLI: wp eval-file audit-listings.php
  *
  * Options (set as environment variables):
- *   CSV_FILE=path         GeoDirectory import CSV file (required)
+ *   CSV_FILE=pattern      GeoDirectory import CSV file or glob pattern (required)
  *   OUTPUT_FILE=path      Write report to file instead of stdout
  *
  * Examples:
  *   CSV_FILE=gd_Stay.csv wp eval-file audit-listings.php
- *   CSV_FILE=gd_Stay.csv OUTPUT_FILE=listing-audit.txt wp eval-file audit-listings.php
+ *   CSV_FILE="done/*.csv" wp eval-file audit-listings.php
+ *   CSV_FILE="done/*.csv" OUTPUT_FILE=listing-audit.txt wp eval-file audit-listings.php
  */
 
 // Load WordPress if not already loaded
@@ -46,85 +49,126 @@ if (!class_exists('GeoDirectory')) {
 }
 
 // ============================================================
+// Load taxonomy for category ID -> name lookup
+// ============================================================
+$taxonomy_file = __DIR__ . '/gd-taxonomy-cpts.json';
+$cat_id_to_name = [];
+if (file_exists($taxonomy_file)) {
+    $taxonomy = json_decode(file_get_contents($taxonomy_file), true);
+    if ($taxonomy && isset($taxonomy['cpts'])) {
+        foreach ($taxonomy['cpts'] as $cpt) {
+            foreach ($cpt['categories'] ?? [] as $cat) {
+                $id = $cat['id'] ?? null;
+                $name = $cat['name'] ?? '';
+                if ($id !== null && $name) {
+                    $cat_id_to_name[$id] = $name;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Resolve a CSV category value (e.g. ",119,") to a human-readable name.
+ */
+function resolve_category_name($cat_value, $cat_id_to_name) {
+    $cat_value = trim($cat_value);
+    if (empty($cat_value)) return '(no category)';
+
+    // Extract numeric ID from ",119," format
+    $id = trim($cat_value, ', ');
+    if (is_numeric($id) && isset($cat_id_to_name[(int)$id])) {
+        return $cat_id_to_name[(int)$id];
+    }
+
+    return $cat_value;
+}
+
+// ============================================================
 // Parse environment variables
 // ============================================================
-$csv_filename = getenv('CSV_FILE') ?: '';
+$csv_pattern = getenv('CSV_FILE') ?: '';
 $output_file = getenv('OUTPUT_FILE') ?: null;
 
-if (empty($csv_filename)) {
-    die("Error: CSV_FILE is required.\n\nUsage:\n  CSV_FILE=gd_Stay.csv wp eval-file audit-listings.php\n");
+if (empty($csv_pattern)) {
+    die("Error: CSV_FILE is required.\n\nUsage:\n  CSV_FILE=gd_Stay.csv wp eval-file audit-listings.php\n  CSV_FILE=\"done/*.csv\" wp eval-file audit-listings.php\n");
 }
 
-// Resolve CSV file path (absolute or relative to script dir)
-if ($csv_filename[0] === '/') {
-    $csv_file = $csv_filename;
-} else {
-    $csv_file = __DIR__ . '/' . $csv_filename;
+// Resolve glob pattern (absolute or relative to script dir)
+if ($csv_pattern[0] !== '/') {
+    $csv_pattern = __DIR__ . '/' . $csv_pattern;
 }
 
-if (!file_exists($csv_file)) {
-    die("Error: Cannot find CSV file: $csv_file\n");
+$csv_files = glob($csv_pattern);
+if (empty($csv_files)) {
+    die("Error: No files match pattern: $csv_pattern\n");
 }
+sort($csv_files);
 
 // ============================================================
-// Parse CSV file
+// Parse CSV files
 // ============================================================
-$handle = fopen($csv_file, 'r');
-if (!$handle) {
-    die("Error: Cannot open CSV file: $csv_file\n");
-}
-
-// Read header row
-$headers = fgetcsv($handle);
-if (!$headers) {
-    fclose($handle);
-    die("Error: CSV file is empty or has no header row.\n");
-}
-
-// Find required column indices
-$title_idx = array_search('post_title', $headers);
-$type_idx = array_search('post_type', $headers);
-$status_idx = array_search('post_status', $headers);
-$category_idx = array_search('post_category', $headers);
-
-if ($title_idx === false) {
-    fclose($handle);
-    die("Error: CSV file missing required 'post_title' column.\n");
-}
-if ($type_idx === false) {
-    fclose($handle);
-    die("Error: CSV file missing required 'post_type' column.\n");
-}
-
-// Read all CSV entries
 $csv_entries = [];
 $csv_post_types = [];
-$row_num = 1; // header was row 1
 
-while (($row = fgetcsv($handle)) !== false) {
-    $row_num++;
-
-    $title = trim($row[$title_idx] ?? '');
-    $post_type = trim($row[$type_idx] ?? '');
-    $status = $status_idx !== false ? trim($row[$status_idx] ?? '') : '';
-    $category = $category_idx !== false ? trim($row[$category_idx] ?? '') : '';
-
-    if (empty($title) || empty($post_type)) {
+foreach ($csv_files as $csv_file) {
+    $handle = fopen($csv_file, 'r');
+    if (!$handle) {
+        fwrite(STDERR, "Warning: Cannot open CSV file: $csv_file — skipping\n");
         continue;
     }
 
-    $csv_entries[] = [
-        'row' => $row_num,
-        'post_title' => $title,
-        'post_type' => $post_type,
-        'post_status' => $status,
-        'post_category' => $category,
-    ];
+    $headers = fgetcsv($handle);
+    if (!$headers) {
+        fclose($handle);
+        fwrite(STDERR, "Warning: CSV file is empty or has no header row: $csv_file — skipping\n");
+        continue;
+    }
 
-    $csv_post_types[$post_type] = true;
+    $title_idx = array_search('post_title', $headers);
+    $type_idx = array_search('post_type', $headers);
+    $status_idx = array_search('post_status', $headers);
+    $category_idx = array_search('post_category', $headers);
+
+    if ($title_idx === false || $type_idx === false) {
+        fclose($handle);
+        fwrite(STDERR, "Warning: CSV file missing post_title or post_type column: $csv_file — skipping\n");
+        continue;
+    }
+
+    $source = basename($csv_file);
+    $row_num = 1;
+
+    while (($row = fgetcsv($handle)) !== false) {
+        $row_num++;
+
+        $title = trim($row[$title_idx] ?? '');
+        $post_type = trim($row[$type_idx] ?? '');
+        $status = $status_idx !== false ? trim($row[$status_idx] ?? '') : '';
+        $category = $category_idx !== false ? trim($row[$category_idx] ?? '') : '';
+
+        if (empty($title) || empty($post_type)) {
+            continue;
+        }
+
+        $csv_entries[] = [
+            'row' => $row_num,
+            'source' => $source,
+            'post_title' => $title,
+            'post_type' => $post_type,
+            'post_status' => $status,
+            'post_category' => $category,
+        ];
+
+        $csv_post_types[$post_type] = true;
+    }
+
+    fclose($handle);
 }
 
-fclose($handle);
+if (empty($csv_entries)) {
+    die("Error: No valid entries found in any CSV file.\n");
+}
 
 $csv_count = count($csv_entries);
 $post_types = array_keys($csv_post_types);
@@ -172,11 +216,51 @@ if ($output_file) {
 // ============================================================
 echo "GeoDirectory Listing Audit\n";
 echo "==========================\n";
-echo "CSV:  $csv_filename\n";
 echo "Date: " . date('Y-m-d H:i:s') . "\n";
+if (count($csv_files) === 1) {
+    echo "CSV:  " . basename($csv_files[0]) . "\n";
+} else {
+    echo "CSV files (" . count($csv_files) . "):\n";
+    foreach ($csv_files as $f) {
+        echo "  - " . basename($f) . "\n";
+    }
+}
 echo "CSV entries: $csv_count\n";
 echo "Post types:  " . implode(', ', $post_types) . "\n";
 echo "\n";
+
+// ============================================================
+// Detect duplicates across CSV files
+// ============================================================
+$multi_file = count($csv_files) > 1;
+$duplicates = []; // post_type -> composite_key -> [entries...]
+$title_seen = [];  // post_type -> composite_key -> first entry
+
+foreach ($csv_entries as $entry) {
+    $pt = $entry['post_type'];
+    $title_key = strtolower(trim($entry['post_title']));
+    $cat_key = strtolower(trim($entry['post_category']));
+    $key = $title_key . '||' . $cat_key;
+
+    if (isset($title_seen[$pt][$key])) {
+        // First time seeing a dupe for this key — add the original too
+        if (!isset($duplicates[$pt][$key])) {
+            $duplicates[$pt][$key] = [$title_seen[$pt][$key]];
+        }
+        $duplicates[$pt][$key][] = $entry;
+    } else {
+        $title_seen[$pt][$key] = $entry;
+    }
+}
+
+$total_dupe_titles = 0;
+$total_dupe_rows = 0;
+foreach ($duplicates as $pt => $groups) {
+    $total_dupe_titles += count($groups);
+    foreach ($groups as $entries) {
+        $total_dupe_rows += count($entries);
+    }
+}
 
 // ============================================================
 // Audit each CPT
@@ -228,15 +312,27 @@ foreach ($post_types as $post_type) {
     if (empty($found)) {
         echo "    (none)\n";
     } else {
-        echo sprintf("    %-5s %-45s %s\n", 'Row', 'Post Title', 'Category');
-        echo sprintf("    %-5s %-45s %s\n", '---', str_repeat('-', 45), str_repeat('-', 15));
-
-        foreach ($found as $entry) {
-            echo sprintf("    %-5d %-45s %s\n",
-                $entry['row'],
-                mb_substr($entry['post_title'], 0, 45),
-                mb_substr($entry['post_category'], 0, 15)
-            );
+        if ($multi_file) {
+            echo sprintf("    %-5s %-30s %-25s %s\n", 'Row', 'Post Title', 'Source', 'Category');
+            echo sprintf("    %-5s %-30s %-25s %s\n", '---', str_repeat('-', 30), str_repeat('-', 25), str_repeat('-', 20));
+            foreach ($found as $entry) {
+                echo sprintf("    %-5d %-30s %-25s %s\n",
+                    $entry['row'],
+                    mb_substr($entry['post_title'], 0, 30),
+                    mb_substr($entry['source'], 0, 25),
+                    mb_substr(resolve_category_name($entry['post_category'], $cat_id_to_name), 0, 20)
+                );
+            }
+        } else {
+            echo sprintf("    %-5s %-45s %s\n", 'Row', 'Post Title', 'Category');
+            echo sprintf("    %-5s %-45s %s\n", '---', str_repeat('-', 45), str_repeat('-', 20));
+            foreach ($found as $entry) {
+                echo sprintf("    %-5d %-45s %s\n",
+                    $entry['row'],
+                    mb_substr($entry['post_title'], 0, 45),
+                    mb_substr(resolve_category_name($entry['post_category'], $cat_id_to_name), 0, 20)
+                );
+            }
         }
     }
     echo "\n";
@@ -248,15 +344,27 @@ foreach ($post_types as $post_type) {
     if (empty($missing)) {
         echo "    (none)\n";
     } else {
-        echo sprintf("    %-5s %-45s %s\n", 'Row', 'Post Title', 'Category');
-        echo sprintf("    %-5s %-45s %s\n", '---', str_repeat('-', 45), str_repeat('-', 15));
-
-        foreach ($missing as $entry) {
-            echo sprintf("    %-5d %-45s %s\n",
-                $entry['row'],
-                mb_substr($entry['post_title'], 0, 45),
-                mb_substr($entry['post_category'], 0, 15)
-            );
+        if ($multi_file) {
+            echo sprintf("    %-5s %-30s %-25s %s\n", 'Row', 'Post Title', 'Source', 'Category');
+            echo sprintf("    %-5s %-30s %-25s %s\n", '---', str_repeat('-', 30), str_repeat('-', 25), str_repeat('-', 20));
+            foreach ($missing as $entry) {
+                echo sprintf("    %-5d %-30s %-25s %s\n",
+                    $entry['row'],
+                    mb_substr($entry['post_title'], 0, 30),
+                    mb_substr($entry['source'], 0, 25),
+                    mb_substr(resolve_category_name($entry['post_category'], $cat_id_to_name), 0, 20)
+                );
+            }
+        } else {
+            echo sprintf("    %-5s %-45s %s\n", 'Row', 'Post Title', 'Category');
+            echo sprintf("    %-5s %-45s %s\n", '---', str_repeat('-', 45), str_repeat('-', 20));
+            foreach ($missing as $entry) {
+                echo sprintf("    %-5d %-45s %s\n",
+                    $entry['row'],
+                    mb_substr($entry['post_title'], 0, 45),
+                    mb_substr(resolve_category_name($entry['post_category'], $cat_id_to_name), 0, 20)
+                );
+            }
         }
     }
     echo "\n";
@@ -281,6 +389,31 @@ foreach ($post_types as $post_type) {
     }
     echo "\n";
 
+    // -- Duplicates within this CPT --
+    $cpt_dupes = $duplicates[$post_type] ?? [];
+    if (!empty($cpt_dupes)) {
+        $dupe_count = count($cpt_dupes);
+        echo "  DUPLICATES ($dupe_count title(s) appear more than once)\n";
+        echo "  " . str_repeat('-', 68) . "\n";
+
+        foreach ($cpt_dupes as $combo_key => $entries) {
+            $cat_display = resolve_category_name($entries[0]['post_category'], $cat_id_to_name);
+            echo sprintf("    \"%s\" [%s] (%d occurrences)\n",
+                $entries[0]['post_title'],
+                $cat_display,
+                count($entries)
+            );
+            foreach ($entries as $dup) {
+                echo sprintf("      Row %-5d  %-30s  %s\n",
+                    $dup['row'],
+                    mb_substr($dup['source'], 0, 30),
+                    resolve_category_name($dup['post_category'], $cat_id_to_name)
+                );
+            }
+        }
+        echo "\n";
+    }
+
     // Track stats
     $cpt_stats = [
         'csv' => $cpt_csv_count,
@@ -288,6 +421,7 @@ foreach ($post_types as $post_type) {
         'found' => count($found),
         'missing' => count($missing),
         'extra' => count($extra),
+        'dupe_titles' => count($cpt_dupes),
     ];
     $summary[$post_type] = $cpt_stats;
     $totals['csv'] += $cpt_csv_count;
@@ -304,31 +438,42 @@ echo "Summary\n";
 echo str_repeat('=', 70) . "\n";
 
 foreach ($summary as $post_type => $stats) {
-    echo sprintf("  %-25s %d in CSV, %d found, %d missing, %d extra\n",
+    $line = sprintf("  %-25s %d in CSV, %d found, %d missing, %d extra",
         $post_type . ':',
         $stats['csv'], $stats['found'], $stats['missing'], $stats['extra']
     );
+    if ($stats['dupe_titles'] > 0) {
+        $line .= sprintf(", %d duplicate title(s)", $stats['dupe_titles']);
+    }
+    echo $line . "\n";
 }
 
 if (count($summary) > 1) {
-    echo sprintf("\n  %-25s %d in CSV, %d found, %d missing, %d extra\n",
+    $line = sprintf("\n  %-25s %d in CSV, %d found, %d missing, %d extra",
         'TOTAL:',
         $totals['csv'], $totals['found'], $totals['missing'], $totals['extra']
     );
+    if ($total_dupe_titles > 0) {
+        $line .= sprintf(", %d duplicate title(s) (%d rows)", $total_dupe_titles, $total_dupe_rows);
+    }
+    echo $line . "\n";
 }
 
 echo "\n";
-if ($totals['missing'] === 0 && $totals['extra'] === 0) {
-    echo "All clear — CSV and site match.\n";
+$status_parts = [];
+if ($totals['missing'] === 0 && $totals['extra'] === 0 && $total_dupe_titles === 0) {
+    echo "All clear — CSV and site match, no duplicates.\n";
 } else {
-    $parts = [];
     if ($totals['missing'] > 0) {
-        $parts[] = "{$totals['missing']} listing(s) missing from site";
+        $status_parts[] = "{$totals['missing']} listing(s) missing from site";
     }
     if ($totals['extra'] > 0) {
-        $parts[] = "{$totals['extra']} extra listing(s) on site not in CSV";
+        $status_parts[] = "{$totals['extra']} extra listing(s) on site not in CSV";
     }
-    echo implode('. ', $parts) . ".\n";
+    if ($total_dupe_titles > 0) {
+        $status_parts[] = "{$total_dupe_titles} duplicate title(s) across CSV files ({$total_dupe_rows} total rows)";
+    }
+    echo implode('. ', $status_parts) . ".\n";
 }
 
 // ============================================================
