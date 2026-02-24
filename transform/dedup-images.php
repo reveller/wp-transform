@@ -25,11 +25,13 @@
  *   POST_TITLE=title    Filter to a single post title for testing
  *   OUTPUT_FILE=path    Write report to file instead of stdout
  *   REGISTER_MEDIA=1    Register GD images into the WP Media Library (default: 0)
+ *   AUDIT_IMAGES=1      Audit post_images: verify files exist on disk and in media library (default: 0)
  *
  * Examples:
  *   CPT_NAME="Food and Drink" DRY_RUN=1 POST_TITLE="Zalatina Foods" wp eval-file dedup-images.php
  *   CPT_NAME="Food and Drink" DRY_RUN=1 REGISTER_MEDIA=1 wp eval-file dedup-images.php
  *   CPT_NAME="Food and Drink" REGISTER_MEDIA=1 wp eval-file dedup-images.php
+ *   CPT_NAME="Food and Drink" AUDIT_IMAGES=1 wp eval-file dedup-images.php
  */
 
 // ============================================================
@@ -69,6 +71,7 @@ $dry_run = !empty(getenv('DRY_RUN'));
 $post_title_filter = getenv('POST_TITLE') ?: null;
 $output_file = getenv('OUTPUT_FILE') ?: null;
 $register_media = !empty(getenv('REGISTER_MEDIA'));
+$audit_images = !empty(getenv('AUDIT_IMAGES'));
 
 if (empty($cpt_filter)) {
     die("Error: CPT_NAME is required.\nUsage: CPT_NAME=\"Food and Drink\" DRY_RUN=1 wp eval-file dedup-images.php\n");
@@ -306,6 +309,9 @@ if ($dry_run) {
 if ($register_media) {
     echo "REGISTER_MEDIA: will register GD images into WP Media Library\n";
 }
+if ($audit_images) {
+    echo "AUDIT_IMAGES: will verify post_images against filesystem and media library\n";
+}
 if ($post_title_filter) {
     echo "Filter: POST_TITLE=\"$post_title_filter\"\n";
 }
@@ -411,6 +417,17 @@ foreach ($posts as $post) {
 
         // Count how many revision siblings exist on disk (exclude the original)
         $revision_members = array_filter($family, function($fm) { return $fm['revision'] !== null; });
+
+        // A file with a -N suffix is only a real revision if the family has 2+ members.
+        // If it's alone (family size 1), the -N is just part of the natural filename
+        // (e.g., cape-air-2025.png, review_oct-2022.jpg).
+        if (count($family) <= 1) {
+            $stats['already_clean']++;
+            if ($post_title_filter) {
+                echo "  [CLEAN] " . basename($att->file) . " (GD #$gd_row_id)\n";
+            }
+            continue;
+        }
 
         if ($parsed['revision'] === null && empty($revision_members)) {
             // Truly clean — original with no orphaned revisions
@@ -701,6 +718,283 @@ if ($register_media) {
             echo "\n";
         }
     }
+}
+
+// ============================================================
+// Audit post_images: verify filesystem + media library
+// ============================================================
+if ($audit_images) {
+    echo str_repeat('=', 70) . "\n";
+    echo "Image Audit: post_images vs Filesystem vs Media Library\n";
+    echo str_repeat('=', 70) . "\n\n";
+
+    $audit_stats = [
+        'posts_audited' => 0,
+        'posts_with_issues' => 0,
+        'images_total' => 0,
+        'images_ok' => 0,
+        'images_missing_disk' => 0,
+        'images_missing_media' => 0,
+        'images_missing_both' => 0,
+        'gd_attachments_total' => 0,
+        'gd_missing_disk' => 0,
+        'gd_missing_media' => 0,
+        'gd_not_in_post_images' => 0,
+        'post_images_not_in_gd' => 0,
+    ];
+
+    // Check if post_images column exists
+    $has_post_images_col = $wpdb->get_var(
+        "SHOW COLUMNS FROM `$detail_table` LIKE 'post_images'"
+    );
+
+    if (!$has_post_images_col) {
+        echo "  Note: post_images column not found in $detail_table\n";
+        echo "  Auditing GD attachments against filesystem and media library only.\n\n";
+    }
+
+    foreach ($posts as $post) {
+        $post_id = $post->ID;
+        $title = $post->post_title;
+        $audit_stats['posts_audited']++;
+
+        // Get post_images from detail table (if column exists)
+        $post_images_raw = '';
+        if ($has_post_images_col) {
+            $post_images_raw = $wpdb->get_var($wpdb->prepare(
+                "SELECT post_images FROM `$detail_table` WHERE post_id = %d",
+                $post_id
+            ));
+        }
+
+        // Get GD attachments for cross-reference
+        $gd_attachments = get_post_gd_attachments($wpdb, $post_id);
+        $gd_files = [];
+        foreach ($gd_attachments as $att) {
+            $gd_files[ltrim($att->file, '/')] = $att;
+        }
+        $audit_stats['gd_attachments_total'] += count($gd_attachments);
+
+        // Parse post_images: URL|ID|TITLE|DESC::URL|ID|TITLE|DESC::...
+        $post_image_entries = [];
+        if (!empty($post_images_raw)) {
+            $parts = explode('::', $post_images_raw);
+            foreach ($parts as $part) {
+                $part = trim($part);
+                if (empty($part)) continue;
+                $fields = explode('|', $part);
+                $url = $fields[0] ?? '';
+                if (!empty($url)) {
+                    $post_image_entries[] = [
+                        'url' => $url,
+                        'id' => $fields[1] ?? '',
+                        'title' => $fields[2] ?? '',
+                        'desc' => $fields[3] ?? '',
+                    ];
+                }
+            }
+        }
+
+        $audit_stats['images_total'] += count($post_image_entries);
+
+        $post_issues = [];
+
+        // Build set of relative paths from post_images URLs
+        $post_image_relatives = [];
+
+        foreach ($post_image_entries as $img) {
+            $url = $img['url'];
+
+            // Extract relative path from URL
+            // URL format: https://domain/wp-content/uploads/YYYY/MM/file.jpg
+            $relative = '';
+            if (strpos($url, $uploads_baseurl) === 0) {
+                $relative = substr($url, strlen($uploads_baseurl) + 1);
+            } else {
+                // Try to extract from /wp-content/uploads/ portion
+                if (preg_match('#/wp-content/uploads/(.+)$#', $url, $m)) {
+                    $relative = $m[1];
+                }
+            }
+
+            if (empty($relative)) {
+                $post_issues[] = [
+                    'type' => 'unparseable',
+                    'image' => basename($url),
+                    'url' => $url,
+                    'on_disk' => '?',
+                    'in_media' => '?',
+                ];
+                continue;
+            }
+
+            $post_image_relatives[$relative] = true;
+
+            $abs_path = $uploads_basedir . '/' . $relative;
+            $on_disk = file_exists($abs_path);
+            $wp_id = find_wp_attachment_by_file($wpdb, $relative);
+            $in_media = !empty($wp_id);
+
+            if ($on_disk && $in_media) {
+                $audit_stats['images_ok']++;
+            } elseif (!$on_disk && !$in_media) {
+                $audit_stats['images_missing_both']++;
+                $post_issues[] = [
+                    'type' => 'missing_both',
+                    'image' => basename($relative),
+                    'relative' => $relative,
+                    'on_disk' => false,
+                    'in_media' => false,
+                ];
+            } elseif (!$on_disk) {
+                $audit_stats['images_missing_disk']++;
+                $post_issues[] = [
+                    'type' => 'missing_disk',
+                    'image' => basename($relative),
+                    'relative' => $relative,
+                    'on_disk' => false,
+                    'in_media' => "WP #$wp_id",
+                ];
+            } else {
+                $audit_stats['images_missing_media']++;
+                $post_issues[] = [
+                    'type' => 'missing_media',
+                    'image' => basename($relative),
+                    'relative' => $relative,
+                    'on_disk' => true,
+                    'in_media' => false,
+                ];
+            }
+        }
+
+        // Cross-check: GD attachments not referenced in post_images
+        // (only relevant when post_images column exists)
+        if ($has_post_images_col) {
+            foreach ($gd_files as $rel_path => $att) {
+                if (!isset($post_image_relatives[$rel_path])) {
+                    $audit_stats['gd_not_in_post_images']++;
+                    $post_issues[] = [
+                        'type' => 'gd_not_in_post_images',
+                        'image' => basename($rel_path),
+                        'relative' => $rel_path,
+                        'note' => "GD #" . $att->$gd_id_col . " not referenced in post_images",
+                    ];
+                }
+            }
+        }
+
+        // Check GD attachment files on disk and in media
+        foreach ($gd_files as $rel_path => $att) {
+            $abs_path = $uploads_basedir . '/' . $rel_path;
+            if (!file_exists($abs_path)) {
+                $audit_stats['gd_missing_disk']++;
+                // Only add issue if not already reported via post_images
+                if (!isset($post_image_relatives[$rel_path])) {
+                    $post_issues[] = [
+                        'type' => 'gd_missing_disk',
+                        'image' => basename($rel_path),
+                        'relative' => $rel_path,
+                        'note' => "GD #" . $att->$gd_id_col . " file missing from disk",
+                    ];
+                }
+            }
+            $wp_id = find_wp_attachment_by_file($wpdb, $rel_path);
+            if (!$wp_id) {
+                $audit_stats['gd_missing_media']++;
+                // When no post_images column, report missing media directly
+                if (!$has_post_images_col && !isset($post_image_relatives[$rel_path])) {
+                    $on_disk = file_exists($abs_path);
+                    if ($on_disk) {
+                        $post_issues[] = [
+                            'type' => 'missing_media',
+                            'image' => basename($rel_path),
+                            'relative' => $rel_path,
+                            'on_disk' => true,
+                            'in_media' => false,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Cross-check: post_images entries not in GD attachments
+        if ($has_post_images_col) {
+            foreach ($post_image_relatives as $rel_path => $_) {
+                if (!isset($gd_files[$rel_path])) {
+                    $audit_stats['post_images_not_in_gd']++;
+                    $post_issues[] = [
+                        'type' => 'post_images_not_in_gd',
+                        'image' => basename($rel_path),
+                        'relative' => $rel_path,
+                        'note' => "In post_images but no matching GD attachment row",
+                    ];
+                }
+            }
+        }
+
+        // Report issues for this post
+        if (!empty($post_issues)) {
+            $audit_stats['posts_with_issues']++;
+            $header_parts = ["Post: $title (ID: $post_id)"];
+            if ($has_post_images_col) {
+                $header_parts[] = count($post_image_entries) . " in post_images";
+            }
+            $header_parts[] = count($gd_attachments) . " GD attachments";
+
+            echo str_repeat('-', 70) . "\n";
+            echo implode(' — ', $header_parts) . "\n";
+            echo str_repeat('-', 70) . "\n";
+
+            foreach ($post_issues as $issue) {
+                switch ($issue['type']) {
+                    case 'missing_both':
+                        echo "  [MISSING]       {$issue['image']} — not on disk, not in media library\n";
+                        break;
+                    case 'missing_disk':
+                        echo "  [NO FILE]       {$issue['image']} — not on disk (but in media: {$issue['in_media']})\n";
+                        break;
+                    case 'missing_media':
+                        echo "  [NO MEDIA]      {$issue['image']} — on disk but not in media library\n";
+                        break;
+                    case 'unparseable':
+                        echo "  [BAD URL]       {$issue['url']}\n";
+                        break;
+                    case 'gd_not_in_post_images':
+                        echo "  [GD ORPHAN]     {$issue['image']} — {$issue['note']}\n";
+                        break;
+                    case 'gd_missing_disk':
+                        echo "  [GD NO FILE]    {$issue['image']} — {$issue['note']}\n";
+                        break;
+                    case 'post_images_not_in_gd':
+                        echo "  [STALE REF]     {$issue['image']} — {$issue['note']}\n";
+                        break;
+                }
+            }
+            echo "\n";
+        }
+    }
+
+    // Audit summary
+    echo str_repeat('-', 70) . "\n";
+    echo "Image Audit Summary\n";
+    echo str_repeat('-', 70) . "\n";
+    echo "  Posts audited:                  {$audit_stats['posts_audited']}\n";
+    echo "  Posts with issues:              {$audit_stats['posts_with_issues']}\n";
+    if ($has_post_images_col) {
+        echo "  Total images in post_images:    {$audit_stats['images_total']}\n";
+        echo "  Images OK (disk + media):       {$audit_stats['images_ok']}\n";
+        echo "  Missing from disk:              {$audit_stats['images_missing_disk']}\n";
+        echo "  Missing from media library:     {$audit_stats['images_missing_media']}\n";
+        echo "  Missing from both:              {$audit_stats['images_missing_both']}\n";
+    }
+    echo "  GD attachments total:           {$audit_stats['gd_attachments_total']}\n";
+    echo "  GD files missing from disk:     {$audit_stats['gd_missing_disk']}\n";
+    echo "  GD files missing from media:    {$audit_stats['gd_missing_media']}\n";
+    if ($has_post_images_col) {
+        echo "  GD rows not in post_images:     {$audit_stats['gd_not_in_post_images']}\n";
+        echo "  post_images not in GD table:    {$audit_stats['post_images_not_in_gd']}\n";
+    }
+    echo "\n";
 }
 
 // ============================================================
