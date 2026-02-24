@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Display GeoDirectory taxonomy mapping as a tree structure.
+Display GeoDirectory CPT-based taxonomy mapping as a tree structure.
 
-Reads the gd-taxonomy-map.json file and outputs a visual tree showing
-parent categories and their subcategories, with IDs for reference.
+Reads the gd-taxonomy-cpts.json file and outputs a visual tree showing
+CPTs, categories, and aliases, with IDs for reference.
 
 Usage:
-    ./taxonomy-tree.py                      # Show categories only
+    ./taxonomy-tree.py                      # Show CPTs and categories
     ./taxonomy-tree.py --tags               # Include tags section
     ./taxonomy-tree.py --file other.json    # Use different input file
 """
@@ -14,12 +14,11 @@ Usage:
 import argparse
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 
-def load_taxonomy(filepath: str) -> list[dict]:
-    """Load taxonomy data from JSON file."""
+def load_taxonomy(filepath: str) -> dict:
+    """Load CPT taxonomy data from JSON file."""
     path = Path(filepath)
     if not path.exists():
         print(f"Error: File not found: {filepath}", file=sys.stderr)
@@ -29,216 +28,120 @@ def load_taxonomy(filepath: str) -> list[dict]:
         return json.load(f)
 
 
-def build_category_tree(data: list[dict]) -> dict:
-    """
-    Build a tree structure from taxonomy data.
+def print_tree(data: dict, show_tags: bool = False):
+    """Print the CPT-based taxonomy tree structure."""
 
-    Returns:
-        {
-            parent_id: {
-                'info': {...},  # Parent category info
-                'children': {
-                    child_id: [entries...]  # List to handle duplicate IDs
-                }
-            }
-        }
-    """
-    # Separate categories and subcategories
-    categories = {}
-    subcategories = defaultdict(lambda: defaultdict(list))
-
-    for entry in data:
-        entry_type = entry.get('type', '')
-
-        if entry_type == 'category':
-            cat_id = entry['id']
-            if cat_id not in categories:
-                categories[cat_id] = {
-                    'info': entry,
-                    'children': defaultdict(list)
-                }
-            else:
-                # Duplicate category ID - add as alias
-                categories[cat_id]['aliases'] = categories[cat_id].get('aliases', [])
-                categories[cat_id]['aliases'].append(entry)
-
-        elif entry_type == 'subcategory':
-            parent_id = entry.get('parent_id', 0)
-            sub_id = entry['id']
-            subcategories[parent_id][sub_id].append(entry)
-
-    # Attach subcategories to their parents
-    for parent_id, children in subcategories.items():
-        if parent_id in categories:
-            categories[parent_id]['children'] = children
-        else:
-            # Orphan subcategories (parent not found)
-            if 0 not in categories:
-                categories[0] = {
-                    'info': {'name': 'Uncategorized', 'id': 0},
-                    'children': defaultdict(list)
-                }
-            for sub_id, entries in children.items():
-                categories[0]['children'][sub_id].extend(entries)
-
-    return categories
-
-
-def get_tags(data: list[dict]) -> list[dict]:
-    """Extract and sort tags from taxonomy data."""
-    tags = [entry for entry in data if entry.get('type') == 'tag']
-    return sorted(tags, key=lambda x: x.get('id', 0))
-
-
-def print_tree(categories: dict, show_tags: bool = False, tags: list[dict] = None):
-    """Print the category tree structure."""
-
-    # Sort categories by ID
-    sorted_cat_ids = sorted(categories.keys())
+    cpts = data.get('cpts', [])
+    global_tags = data.get('global_tags', [])
 
     print("=" * 70)
-    print("GEODIRECTORY CATEGORY TREE")
+    print("GEODIRECTORY CPT-BASED TAXONOMY TREE")
     print("=" * 70)
     print()
 
-    for cat_idx, cat_id in enumerate(sorted_cat_ids):
-        if cat_id == 0:
-            continue  # Skip the placeholder for orphans
+    for cpt_idx, cpt in enumerate(cpts):
+        cpt_name = cpt.get('cpt', 'Unknown')
+        post_type = cpt.get('post_type', '')
+        slug = cpt.get('slug', '')
+        categories = cpt.get('categories', [])
 
-        cat_data = categories[cat_id]
-        cat_info = cat_data['info']
-        cat_name = cat_info.get('name', 'Unknown')
+        # Print CPT header
+        print(f"{cpt_name}")
+        print(f"  post_type: {post_type}")
+        print(f"  slug: {slug}")
 
-        # Print parent category
-        print(f"{cat_name} ({cat_id})")
+        # Print categories
+        for cat_idx, category in enumerate(categories):
+            cat_name = category.get('name', 'Unknown')
+            cat_id = category.get('id', 0)
+            cat_slug = category.get('slug', '')
+            aliases = category.get('aliases', [])
 
-        # Print any aliases for this category (duplicate IDs)
-        aliases = cat_data.get('aliases', [])
-        children = cat_data.get('children', {})
+            is_last_cat = cat_idx == len(categories) - 1
+            prefix = "└── " if is_last_cat else "├── "
 
-        # Determine if we have content to show below this category
-        has_aliases = len(aliases) > 0
-        has_children = len(children) > 0
+            print(f"  {prefix}{cat_name} ({cat_id})")
 
-        # Print aliases first
-        for alias_idx, alias in enumerate(aliases):
-            alias_name = alias.get('name', 'Unknown')
-            is_last_alias = (alias_idx == len(aliases) - 1) and not has_children
-            prefix = "└── " if is_last_alias else "├── "
-            print(f"{prefix}{alias_name} ({cat_id}) [alias]")
+            # Print aliases
+            if aliases:
+                for alias_idx, alias in enumerate(aliases):
+                    is_last_alias = alias_idx == len(aliases) - 1
 
-        # Sort children by subcategory ID
-        sorted_child_ids = sorted(children.keys())
-
-        for child_idx, child_id in enumerate(sorted_child_ids):
-            entries = children[child_id]
-            is_last_child = child_idx == len(sorted_child_ids) - 1
-
-            # First entry is the primary
-            primary = entries[0]
-            primary_name = primary.get('name', 'Unknown')
-            prefix = "└── " if is_last_child else "├── "
-            print(f"{prefix}{primary_name} ({child_id})")
-
-            # Additional entries with same ID are aliases
-            if len(entries) > 1:
-                for alias_idx, alias in enumerate(entries[1:]):
-                    alias_name = alias.get('name', 'Unknown')
-                    is_last_alias = alias_idx == len(entries) - 2
-
-                    # Determine continuation character
-                    if is_last_child:
+                    if is_last_cat:
                         cont = "    "
                     else:
                         cont = "│   "
 
                     alias_prefix = "└── " if is_last_alias else "├── "
-                    print(f"{cont}{alias_prefix}{alias_name} ({child_id}) [alias]")
+                    print(f"  {cont}{alias_prefix}{alias} ({cat_id}) [alias]")
 
-        print()  # Blank line between parent categories
+        print()  # Blank line between CPTs
 
-    # Print tags if requested
-    if show_tags and tags:
+    # Print global tags if requested
+    if show_tags and global_tags:
         print("=" * 70)
-        print("TAGS")
+        print("GLOBAL TAGS")
         print("=" * 70)
         print()
 
-        # Group tags by ID to show aliases
-        tags_by_id = defaultdict(list)
-        for tag in tags:
-            tags_by_id[tag['id']].append(tag)
-
-        sorted_tag_ids = sorted(tags_by_id.keys())
-
-        for tag_id in sorted_tag_ids:
-            tag_entries = tags_by_id[tag_id]
-            primary = tag_entries[0]
-            primary_name = primary.get('name', 'Unknown')
-
-            if len(tag_entries) == 1:
-                print(f"  {primary_name} ({tag_id})")
-            else:
-                print(f"  {primary_name} ({tag_id})")
-                for alias in tag_entries[1:]:
-                    alias_name = alias.get('name', 'Unknown')
-                    print(f"      └── {alias_name} ({tag_id}) [alias]")
+        for tag in sorted(global_tags, key=lambda x: x.get('name', '')):
+            tag_name = tag.get('name', 'Unknown')
+            tag_id = tag.get('id', 0)
+            print(f"  {tag_name} ({tag_id})")
 
         print()
 
 
-def print_summary(data: list[dict], categories: dict, tags: list[dict]):
+def print_summary(data: dict):
     """Print summary statistics."""
+    cpts = data.get('cpts', [])
+    global_tags = data.get('global_tags', [])
+
     print("=" * 70)
     print("SUMMARY")
     print("=" * 70)
 
-    cat_count = len([c for c in categories.keys() if c != 0])
-    subcat_count = sum(
-        len(children)
-        for cat_id, cat_data in categories.items()
-        if cat_id != 0
-        for children in [cat_data.get('children', {})]
-    )
-    tag_count = len(set(t['id'] for t in tags))
+    total_categories = 0
+    total_aliases = 0
 
-    # Count aliases
-    total_entries = len(data)
-    unique_ids = len(set(e['id'] for e in data))
-    alias_count = total_entries - unique_ids
+    for cpt in cpts:
+        categories = cpt.get('categories', [])
+        total_categories += len(categories)
+        for cat in categories:
+            total_aliases += len(cat.get('aliases', []))
 
-    print(f"  Parent categories: {cat_count}")
-    print(f"  Subcategories:     {subcat_count}")
-    print(f"  Tags:              {tag_count}")
-    print(f"  Total entries:     {total_entries}")
-    print(f"  Unique IDs:        {unique_ids}")
-    print(f"  Aliases (ACF→GD):  {alias_count}")
+    print(f"  CPTs:              {len(cpts)}")
+    print(f"  Categories:        {total_categories}")
+    print(f"  Aliases:           {total_aliases}")
+    print(f"  Global Tags:       {len(global_tags)}")
+    print(f"  Total mappings:    {total_categories + total_aliases}")
     print()
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Display GeoDirectory taxonomy mapping as a tree structure.',
+        description='Display GeoDirectory CPT-based taxonomy mapping as a tree structure.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                        Show category tree only
-  %(prog)s --tags                 Include tags section
+  %(prog)s                        Show CPT/category tree only
+  %(prog)s --tags                 Include global tags section
   %(prog)s --file other.json      Use different input file
+  %(prog)s --summary              Include summary statistics
   %(prog)s > taxonomy.txt         Save output to file
         """
     )
 
     parser.add_argument(
         '--file', '-f',
-        default='gd-taxonomy-map.json',
-        help='Input JSON file (default: gd-taxonomy-map.json)'
+        default='gd-taxonomy-cpts.json',
+        help='Input JSON file (default: gd-taxonomy-cpts.json)'
     )
 
     parser.add_argument(
         '--tags', '-t',
         action='store_true',
-        help='Include tags in the output'
+        help='Include global tags in the output'
     )
 
     parser.add_argument(
@@ -252,16 +155,12 @@ Examples:
     # Load data
     data = load_taxonomy(args.file)
 
-    # Build structures
-    categories = build_category_tree(data)
-    tags = get_tags(data) if args.tags or args.summary else []
-
     # Print tree
-    print_tree(categories, show_tags=args.tags, tags=tags)
+    print_tree(data, show_tags=args.tags)
 
     # Print summary if requested
     if args.summary:
-        print_summary(data, categories, tags)
+        print_summary(data)
 
 
 if __name__ == '__main__':

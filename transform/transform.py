@@ -28,15 +28,15 @@ SOCIAL_MEDIA_URLS = {
 
 # Field name mapping: ACF/CSV field names -> GeoDirectory field names
 # Supports dual naming in override files (both ACF and GD names accepted)
+# Updated for new GeoDirectory format (gd_place_dev.csv)
 ACF_TO_GD_FIELD_MAP = {
     # ACF custom fields
-    'acf_location': 'location',
+    'acf_location': 'neighbourhood',  # Updated: location removed, maps to neighbourhood lookup
     'acf_phone': 'phone',
     'acf_website': 'website',
-    'acf_email': 'email_',
-    'acf_fixed_image': 'fixed_image',
-    'acf_spotlight_link': 'spotlight_link',
-    'acf_template_layout': 'layout',
+    'acf_email': 'email',  # Updated: was email_
+    'acf_description': 'post_content',  # New: override description replaces content
+    'acf_template_layout': 'listing_size',  # Updated: was layout
     'acf_facebook': 'facebook',
     'acf_twitter': 'twitter',
     'acf_instagram': 'instagram',
@@ -45,9 +45,6 @@ ACF_TO_GD_FIELD_MAP = {
     'acf_linked_in': 'linkedin',
     'acf_trip_advisor': 'trip_advisor',
     'acf_yelp': 'yelp',
-    'acf_other_social_label': 'other_social_label',
-    'acf_other_social_url': 'other_social_url',
-    'acf_other_social_icon': 'other_social_icon',
     # CSV export fields
     'Title': 'post_title',
     'Content': 'post_content',
@@ -62,7 +59,6 @@ ACF_TO_GD_FIELD_MAP = {
     'images': 'post_images',
     'slider': 'post_images',
     'website_url': 'website',
-    'image_alignment': 'featured_image_alignment',
 }
 
 # Build reverse mapping (GD -> ACF/CSV) for override files using GD names
@@ -424,6 +420,37 @@ def get_location_validation_warnings() -> List[str]:
     return _LOCATION_VALIDATION_WARNINGS.copy()
 
 
+# St. Croix zip code to city mapping
+_ZIP_TO_CITY = {
+    '00820': 'Christiansted',
+    '00821': 'Christiansted',
+    '00822': 'Christiansted',
+    '00823': 'Christiansted',
+    '00824': 'Christiansted',
+    '00840': 'Frederiksted',
+    '00841': 'Frederiksted',
+    '00850': 'Kingshill',
+    '00851': 'Kingshill',
+}
+
+
+def get_city_from_zip(zip_code: str) -> str:
+    """
+    Get city name from a St. Croix zip code.
+
+    Used as a fallback for city mapping when --neighborhood-map is not specified.
+
+    Args:
+        zip_code: ZIP code string (e.g., '00820')
+
+    Returns:
+        City name or empty string if zip code not recognized
+    """
+    if not zip_code:
+        return ''
+    return _ZIP_TO_CITY.get(zip_code.strip(), '')
+
+
 # ============================================================================
 # CPT-BASED TAXONOMY SYSTEM
 # ============================================================================
@@ -497,9 +524,13 @@ def load_cpt_taxonomy(json_path: str | Path = 'gd-taxonomy-cpts.json') -> None:
         if tag_name and tag_id:
             _CPT_TAG_LOOKUP[tag_name] = tag_id
 
+    # Build multiselect label-to-slug maps from common_fields
+    _build_multiselect_maps()
+
     print(f"   Loaded CPT taxonomy: {len(_CPT_TAXONOMY.get('cpts', []))} CPTs, "
           f"{len(_CPT_CATEGORY_LOOKUP)} categories/aliases, "
-          f"{len(_CPT_TAG_LOOKUP)} tags", file=sys.stderr)
+          f"{len(_CPT_TAG_LOOKUP)} tags, "
+          f"{len(_MULTISELECT_LABEL_MAP)} multiselect maps", file=sys.stderr)
 
 
 def get_category_info(name: str) -> Dict[str, Any] | None:
@@ -557,6 +588,105 @@ def get_tag_id(name: str) -> int | None:
 def get_cpt_taxonomy_loaded() -> bool:
     """Check if CPT taxonomy has been loaded."""
     return _CPT_TAXONOMY is not None
+
+
+# ============================================================================
+# MULTISELECT LABEL-TO-SLUG MAPPING
+# ============================================================================
+# Parses "Label/value" options from common_fields multiselect definitions
+# to map human-readable labels to stored slug values.
+
+_MULTISELECT_LABEL_MAP: Dict[str, Dict[str, str]] = {}
+
+
+def _build_multiselect_maps() -> None:
+    """
+    Build label-to-slug lookup maps for multiselect fields from CPT taxonomy.
+
+    Parses the "Label/value" option format used in common_fields definitions.
+    Called automatically after load_cpt_taxonomy(). Maps are keyed by
+    htmlvar_name (e.g., 'locations', 'recommended_for', 'extras').
+
+    Each map entry maps: label (case-insensitive) -> slug value
+    Slug values also map to themselves for pass-through.
+    """
+    global _MULTISELECT_LABEL_MAP
+
+    if _CPT_TAXONOMY is None:
+        return
+
+    _MULTISELECT_LABEL_MAP = {}
+
+    for field in _CPT_TAXONOMY.get('common_fields', []):
+        if field.get('field_type') != 'multiselect':
+            continue
+
+        field_name = field.get('htmlvar_name', '')
+        options_str = field.get('options', '')
+        if not field_name or not options_str:
+            continue
+
+        label_map = {}
+        for option in options_str.split('\r\n'):
+            option = option.strip()
+            if not option:
+                continue
+
+            if '/' in option:
+                # "Label/value" format
+                label, slug = option.rsplit('/', 1)
+                label_map[label.strip().lower()] = slug.strip()
+                # Also allow slug to pass through
+                label_map[slug.strip().lower()] = slug.strip()
+            else:
+                # Plain label (no slug) - use as-is
+                label_map[option.lower()] = option
+
+        if label_map:
+            _MULTISELECT_LABEL_MAP[field_name] = label_map
+
+
+def map_multiselect_values(field_name: str, raw_value: str) -> str:
+    """
+    Map multiselect field values from labels to slug values.
+
+    Accepts comma-separated or pipe-separated values. Each value is looked up
+    in the label-to-slug map for the given field. Unknown values pass through
+    unchanged.
+
+    Args:
+        field_name: The multiselect field name (e.g., 'locations', 'extras')
+        raw_value: Comma or pipe-separated string of labels or slugs
+
+    Returns:
+        Comma-separated string of slug values
+
+    Example:
+        map_multiselect_values('locations', 'Christiansted|North Shore')
+        # Returns 'christiansted,north-shore'
+
+        map_multiselect_values('extras', 'Book Online, Pet Friendly')
+        # Returns 'book-online,pet-friendly'
+    """
+    if not raw_value:
+        return ''
+
+    label_map = _MULTISELECT_LABEL_MAP.get(field_name, {})
+    if not label_map:
+        # No mapping available, just normalize separators
+        parts = re.split(r'[,|]', raw_value)
+        return ','.join(p.strip() for p in parts if p.strip())
+
+    parts = re.split(r'[,|]', raw_value)
+    mapped = []
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        # Look up by lowercase label; pass through if not found
+        mapped.append(label_map.get(part.lower(), part))
+
+    return ','.join(mapped)
 
 
 # ============================================================================
@@ -696,7 +826,7 @@ def apply_overrides(row: dict, override_data: dict) -> dict:
     Apply override data to a CSV row.
 
     Supports both ACF field names (acf_phone) and GD field names (phone).
-    If a field exists in override (even if null), it replaces the CSV value.
+    Only overrides if the value is not None - null/None means "keep original".
 
     Args:
         row: CSV row dictionary (will not be modified)
@@ -710,6 +840,11 @@ def apply_overrides(row: dict, override_data: dict) -> dict:
         override = {'Title': 'Hotel X', 'acf_phone': '999-8888'}
         result = apply_overrides(row, override)
         # result['acf_phone'] == '999-8888'
+
+        # None means "don't override":
+        override = {'Title': 'Hotel X', 'acf_phone': None}
+        result = apply_overrides(row, override)
+        # result['acf_phone'] == '123-4567' (unchanged)
     """
     # Create a copy to avoid modifying original
     row = row.copy()
@@ -718,11 +853,13 @@ def apply_overrides(row: dict, override_data: dict) -> dict:
         if field == 'Title':
             continue  # Don't override the key field
 
-        # Convert value to string to match CSV data types
-        # CSV files always have strings, but JSON can have numbers, booleans, null, etc.
+        # Skip None values - null means "don't override, keep original"
         if value is None:
-            str_value = ''
-        elif isinstance(value, bool):
+            continue
+
+        # Convert value to string to match CSV data types
+        # CSV files always have strings, but JSON can have numbers, booleans, etc.
+        if isinstance(value, bool):
             # Handle booleans explicitly (before numeric check)
             str_value = '1' if value else '0'
         elif isinstance(value, (int, float)):
@@ -795,12 +932,14 @@ def apply_output_overrides(output_row: dict, title: str, categories: str,
         if field.startswith('acf_'):
             continue
 
+        # Skip None values - null means "don't override, keep original"
+        if value is None:
+            continue
+
         # If this field exists in output_row, override it
         if field in output_row:
             # Convert value to string (same logic as apply_overrides)
-            if value is None:
-                str_value = ''
-            elif isinstance(value, bool):
+            if isinstance(value, bool):
                 str_value = '1' if value else '0'
             elif isinstance(value, (int, float)):
                 if isinstance(value, float) and value.is_integer():
@@ -1557,22 +1696,90 @@ def get_first_category_id(post_category_ids):
 
 
 def format_phone(phone):
-    """Format phone number as 340-555-1234"""
+    """
+    Format a single phone number as (xxx)xxx-xxxx, preserving extensions.
+
+    Extracts the extension (if any) before digit processing, then formats
+    the base number. Extensions are appended as " Ext. <number>".
+
+    Args:
+        phone: Raw phone number string, possibly with extension
+               e.g., "(340) 778-7000 Ext.122" or "340-555-1234"
+
+    Returns:
+        Formatted phone string as "(xxx)xxx-xxxx" or "(xxx)xxx-xxxx Ext. <ext>",
+        or empty string if the base number is invalid
+    """
     if not phone:
         return ''
 
-    # Remove all non-numeric characters
-    digits = re.sub(r'\D', '', phone)
+    # Strip labels like "Cell:", "Office:", "Fax:", etc.
+    cleaned = re.sub(r'^[A-Za-z]+:\s*', '', phone.strip())
 
-    # Format as 340-555-1234
+    # Extract extension (e.g., "Ext.122", "Ext 122", "ext. 122", "x122")
+    ext = ''
+    ext_match = re.search(r'\b(?:ext\.?|x)\s*(\d+)', cleaned, re.IGNORECASE)
+    if ext_match:
+        ext = ext_match.group(1)
+        # Remove extension from string before digit extraction
+        cleaned = cleaned[:ext_match.start()]
+
+    # Remove all non-numeric characters to get base phone digits
+    digits = re.sub(r'\D', '', cleaned)
+
+    # Format as (xxx)xxx-xxxx
     if len(digits) == 10:
-        return f"{digits[0:3]}-{digits[3:6]}-{digits[6:10]}"
+        formatted = f"({digits[0:3]}){digits[3:6]}-{digits[6:10]}"
     elif len(digits) == 7:
         # Assume local St. Croix number, add 340
-        return f"340-{digits[0:3]}-{digits[3:7]}"
+        formatted = f"(340){digits[0:3]}-{digits[3:7]}"
+    else:
+        # Return empty if can't format to valid (xxx)xxx-xxxx
+        return ''
 
-    # Return original if can't format
-    return phone
+    # Append extension if present
+    if ext:
+        formatted += f" Ext. {ext}"
+
+    return formatted
+
+
+def parse_phone_numbers(raw_phone):
+    """
+    Parse a phone field that may contain multiple phone numbers.
+
+    Splits on comma or pipe, formats each number as (xxx)xxx-xxxx
+    (with optional extension), and returns up to two validated phone numbers.
+
+    Args:
+        raw_phone: Raw phone field value, possibly containing multiple
+                   numbers separated by comma or pipe
+
+    Returns:
+        Tuple of (phone, alt_phone) where each is a formatted string
+        in (xxx)xxx-xxxx format, or empty string if not found/invalid
+
+    Example:
+        parse_phone_numbers('340-555-1234, 340-555-5678')
+        # Returns ('(340)555-1234', '(340)555-5678')
+
+        parse_phone_numbers('(340) 778-7000 Ext.122 | Cell: (340) 643-9448')
+        # Returns ('(340)778-7000 Ext. 122', '(340)643-9448')
+
+        parse_phone_numbers('340-555-1234')
+        # Returns ('(340)555-1234', '')
+    """
+    if not raw_phone:
+        return '', ''
+
+    # Split on comma or pipe
+    parts = re.split(r'[,|]', raw_phone)
+    parts = [p.strip() for p in parts if p.strip()]
+
+    phone = format_phone(parts[0]) if len(parts) >= 1 else ''
+    alt_phone = format_phone(parts[1]) if len(parts) >= 2 else ''
+
+    return phone, alt_phone
 
 
 def transform_image_url(url):
@@ -1639,8 +1846,8 @@ def format_images_gallery(images_field):
     if not urls:
         return ''
 
-    # Filter out any remaining non-URL values and transform to relative paths
-    transformed_urls = []
+    # Filter out any remaining non-URL values (keep full URLs for GeoDirectory import)
+    valid_urls = []
     for url in urls:
         # Skip numeric-only values (image IDs)
         if url.isdigit():
@@ -1648,18 +1855,16 @@ def format_images_gallery(images_field):
         # Skip empty values
         if not url.strip():
             continue
-        # Transform and add
-        transformed_url = transform_image_url(url)
         # Only keep if it looks like a URL (starts with / or http)
-        if transformed_url.startswith('/') or transformed_url.startswith('http'):
-            transformed_urls.append(transformed_url)
+        if url.startswith('/') or url.startswith('http'):
+            valid_urls.append(url)
 
-    if not transformed_urls:
+    if not valid_urls:
         return ''
 
     # Format as GeoDirectory expects: URL|ID|TITLE|DESCRIPTION
     # Leave ID, TITLE, DESCRIPTION empty for new imports
-    formatted_images = ['|'.join([url, '', '', '']) for url in transformed_urls]
+    formatted_images = ['|'.join([url, '', '', '']) for url in valid_urls]
 
     # Return images separated by ::
     return '::'.join(formatted_images)
@@ -1782,6 +1987,28 @@ def transform_social_url(platform, value):
     # Fallback: just clean the URL
     return clean_url(value)
 
+
+def transform_layout_to_listing_size(layout):
+    """
+    Map ACF template layout to GeoDirectory listing_size.
+
+    Args:
+        layout: ACF template layout value (wide, small, narrow)
+
+    Returns:
+        GeoDirectory listing_size value (Large, Medium, Small) or empty string
+    """
+    if not layout:
+        return ''
+
+    mapping = {
+        'wide': 'Large',
+        'small': 'Medium',
+        'narrow': 'Small'
+    }
+    return mapping.get(layout.lower().strip(), '')
+
+
 def filter_beaver_builder_tags(content):
     """
     Remove Beaver Builder tags from content
@@ -1806,7 +2033,40 @@ def filter_beaver_builder_tags(content):
     content = re.sub(r'\\u003c!\\u002d\\u002d\s*/?wp:fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
     content = re.sub(r'\\u003c!\\u002d\\u002d\s*fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
 
+    # Remove WordPress shortcodes: [wpbb ...], [display-posts ...], [fl_builder ...], etc.
+    content = re.sub(r'\[/?(?:wpbb|display-posts|fl_builder)\b[^\]]*\]', '', content, flags=re.IGNORECASE)
+
     # Clean up any excessive whitespace left behind
+    content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
+
+    return content.strip()
+
+
+def strip_html_tags(content):
+    """
+    Remove all HTML tags from content, preserving text.
+
+    Strips all HTML/XML tags (e.g., <p>, <div>, <a href="...">, <br/>, etc.)
+    and collapses excessive whitespace left behind.
+
+    Args:
+        content: HTML/text content
+
+    Returns:
+        Plain text content with all HTML tags removed
+    """
+    if not content:
+        return ''
+
+    # Replace block-level and line-break tags with newlines to preserve spacing
+    content = re.sub(r'</?(?:p|div|br|h[1-6]|ul|ol|li|tr|td|th|table|blockquote|section|article|header|footer|nav|aside|main|figure|figcaption|hr)\b[^>]*/?>',
+                     '\n', content, flags=re.IGNORECASE)
+
+    # Remove all remaining HTML tags (inline: span, a, strong, em, etc.)
+    content = re.sub(r'<[^>]+>', ' ', content)
+
+    # Collapse runs of whitespace (but preserve paragraph breaks)
+    content = re.sub(r'[ \t]+', ' ', content)
     content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
 
     return content.strip()
@@ -1885,15 +2145,63 @@ def extract_jpg_urls_from_content(content):
             seen.add(url_lower)
             unique_urls.append(url)
 
-    # Transform URLs to relative paths (remove domain and path up to uploads)
-    transformed_urls = [transform_image_url(url) for url in unique_urls]
-
+    # Keep full URLs for GeoDirectory import (no transformation)
     # Format as GeoDirectory expects: URL|ID|TITLE|DESCRIPTION
     # Leave ID, TITLE, DESCRIPTION empty for new imports
-    formatted_images = ['|'.join([url, '', '', '']) for url in transformed_urls]
+    formatted_images = ['|'.join([url, '', '', '']) for url in unique_urls]
 
     # Return images separated by ::
     return '::'.join(formatted_images)
+
+
+def remove_images_from_content(content):
+    """
+    Remove image references from HTML content.
+
+    Removes:
+    - <img> tags and their attributes
+    - <figure> elements containing images
+    - <a> tags that wrap images (href to image files)
+    - WordPress image blocks
+    - Beaver Builder image modules
+
+    Args:
+        content: HTML/text content that may contain image references
+
+    Returns:
+        Cleaned content with image references removed
+    """
+    if not content:
+        return ''
+
+    # Remove WordPress image blocks: <!-- wp:image --> ... <!-- /wp:image -->
+    content = re.sub(r'<!--\s*wp:image[^>]*-->.*?<!--\s*/wp:image\s*-->', '', content, flags=re.DOTALL | re.IGNORECASE)
+
+    # Remove figure elements (commonly wrap images)
+    content = re.sub(r'<figure[^>]*>.*?</figure>', '', content, flags=re.DOTALL | re.IGNORECASE)
+
+    # Remove img tags (standalone or within other elements)
+    content = re.sub(r'<img[^>]*/?>', '', content, flags=re.IGNORECASE)
+
+    # Remove anchor tags that link directly to images (.jpg, .jpeg, .png, .gif, .webp)
+    content = re.sub(r'<a[^>]*href=["\'][^"\']*\.(?:jpe?g|png|gif|webp)["\'][^>]*>.*?</a>', '', content, flags=re.DOTALL | re.IGNORECASE)
+
+    # Remove empty anchor tags that may remain
+    content = re.sub(r'<a[^>]*>\s*</a>', '', content, flags=re.IGNORECASE)
+
+    # Remove Beaver Builder photo modules
+    content = re.sub(r'<div[^>]*class=["\'][^"\']*fl-photo[^"\']*["\'][^>]*>.*?</div>', '', content, flags=re.DOTALL | re.IGNORECASE)
+
+    # Remove WordPress gallery blocks
+    content = re.sub(r'<!--\s*wp:gallery[^>]*-->.*?<!--\s*/wp:gallery\s*-->', '', content, flags=re.DOTALL | re.IGNORECASE)
+
+    # Clean up multiple consecutive newlines/whitespace
+    content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
+
+    # Clean up empty paragraphs
+    content = re.sub(r'<p[^>]*>\s*</p>', '', content, flags=re.IGNORECASE)
+
+    return content.strip()
 
 
 def extract_youtube_urls_from_content(content):
@@ -1980,24 +2288,131 @@ def extract_urls_from_geodir_format(geodir_string):
     return urls
 
 
-def load_address_cache(cache_file='address_cache.json'):
-    """Load address cache from JSON file"""
-    if not Path(cache_file).exists():
-        return {}
+def deduplicate_images_by_basename(geodir_string):
+    """
+    Deduplicate images by basename, keeping the one with the latest date.
+
+    When multiple images have the same basename (filename), keeps only the one
+    with the latest YYYY/MM directory path. Preserves the full path for the winner.
+
+    Format: URL|ID|TITLE|DESC::URL|ID|TITLE|DESC
+
+    Args:
+        geodir_string: GeoDirectory formatted image string
+
+    Returns:
+        Deduplicated GeoDirectory formatted string
+
+    Example:
+        Input:  "/2021/05/photo.jpg|||::/2023/11/photo.jpg|||"
+        Output: "/2023/11/photo.jpg|||"  (2023/11 is later)
+    """
+    if not geodir_string or not geodir_string.strip():
+        return ''
+
+    # Parse entries (split by :: or :::)
+    entries = re.split(r':::?', geodir_string)
+    entries = [e.strip() for e in entries if e.strip()]
+
+    if not entries:
+        return ''
+
+    # Group entries by basename
+    # Each entry is URL|ID|TITLE|DESC
+    basename_groups = {}  # basename -> list of (entry, date_tuple)
+
+    for entry in entries:
+        parts = entry.split('|')
+        if not parts or not parts[0].strip():
+            continue
+
+        url = parts[0].strip()
+
+        # Extract basename from URL
+        # URL might be like: /2023/11/photo.jpg or https://domain.com/wp-content/uploads/2023/11/photo.jpg
+        basename = url.split('/')[-1] if '/' in url else url
+
+        # Remove resolution suffixes for grouping (e.g., photo-1024x768.jpg -> photo.jpg)
+        # But keep the full URL for the final output
+        base_for_grouping = re.sub(r'-\d+x\d+(\.jpe?g|\.png|\.gif|\.webp)$', r'\1', basename, flags=re.IGNORECASE)
+
+        # Extract YYYY/MM from the path for date comparison
+        # Look for pattern like /2023/11/ or /2023/1/
+        date_match = re.search(r'/(\d{4})/(\d{1,2})/', url)
+        if date_match:
+            year = int(date_match.group(1))
+            month = int(date_match.group(2))
+            date_tuple = (year, month)
+        else:
+            # No date found, use (0, 0) so it loses to any dated image
+            date_tuple = (0, 0)
+
+        if base_for_grouping not in basename_groups:
+            basename_groups[base_for_grouping] = []
+        basename_groups[base_for_grouping].append((entry, date_tuple))
+
+    # For each group, keep the entry with the latest date
+    deduplicated = []
+    for basename, group in basename_groups.items():
+        # Sort by date tuple descending (latest first)
+        group.sort(key=lambda x: x[1], reverse=True)
+        # Keep the winner (latest date)
+        deduplicated.append(group[0][0])
+
+    # Return in GeoDirectory format
+    return '::'.join(deduplicated)
+
+
+def load_image_inventory(inventory_file):
+    """
+    Load image inventory from JSON file.
+
+    Args:
+        inventory_file: Path to JSON inventory file
+
+    Returns:
+        Set of image paths from the inventory
+    """
+    path = Path(inventory_file)
+    if not path.exists():
+        return set()
 
     try:
-        with open(cache_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        with path.open('r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, list):
+                return set(data)
+            return set()
     except Exception as e:
-        print(f"⚠️  Warning: Could not load address cache: {e}", file=sys.stderr)
-        return {}
+        print(f"⚠️  Warning: Could not load image inventory: {e}", file=sys.stderr)
+        return set()
 
-def transform_csv(input_file, output_file, test_mode=False, category_filter=None, tags_filter=None,
+
+def save_image_inventory(inventory_file, images):
+    """
+    Save image inventory to JSON file.
+
+    Args:
+        inventory_file: Path to JSON inventory file
+        images: Set or list of image paths to save
+    """
+    # Sort for consistent output and easier review
+    sorted_images = sorted(images)
+
+    try:
+        with open(inventory_file, 'w', encoding='utf-8') as f:
+            json.dump(sorted_images, f, indent=2)
+        print(f"📷 Saved {len(sorted_images)} images to inventory: {inventory_file}", file=sys.stderr)
+    except Exception as e:
+        print(f"❌ Error saving image inventory: {e}", file=sys.stderr)
+
+
+def transform_csv(input_file, output_file, test_mode=False, not_test_mode=False, category_filter=None, tags_filter=None,
                   layouts_filter=None, exclude_categories=None, exclude_tags=None,
-                  skip_geocoding=False, use_address_cache=False, filter_bb=False,
+                  skip_geocoding=False,
                   enable_default_address=False, image_script=None, clean_tab_contents=False,
                   include_filter=None, exclude_filter=None, entries_per_file=None,
-                  override_files=None, pull_tabs=False):
+                  override_files=None, pull_tabs=False, image_inventory_file=None):
     """
     Transform ACF CSV to GeoDirectory format
 
@@ -2005,14 +2420,13 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         input_file: Path to ACF export CSV
         output_file: Path for GeoDirectory import CSV
         test_mode: If True, only process first 5 rows
+        not_test_mode: If True, skip first 5 rows (process the rest)
         category_filter: Comma-separated category names to filter by (include only)
         tags_filter: Comma-separated tags to filter by (include only)
         layouts_filter: Comma-separated layout names to filter by (include only)
         exclude_categories: Comma-separated category names to exclude
         exclude_tags: Comma-separated tags to exclude
         skip_geocoding: If True, uses St. Croix center coordinates (fallback if no mapping)
-        use_address_cache: If True, loads addresses from address_cache.json
-        filter_bb: If True, filters out Beaver Builder tags from content
         enable_default_address: If True, uses default address when street is empty
         clean_tab_contents: If True, extracts tabs and removes them from content
         include_filter: List of exact post_title values to include (process only these)
@@ -2021,8 +2435,10 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         override_files: List of JSON files with field overrides (keyed by Title + Categories).
                        Acts as a WHITELIST - if provided, only entries with matching overrides are processed.
         pull_tabs: If True, extracts tab data from content to tab fields; if False, leaves tab fields empty
+        image_inventory_file: If provided, maintains a running inventory of deduplicated image references
+                             in a JSON array file. New images are added, existing ones preserved.
     """
-    
+
     # Check input file exists
     if not Path(input_file).exists():
         print(f"❌ Error: Input file not found: {input_file}")
@@ -2058,15 +2474,6 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
     if exclude_filter:
         exclude_titles = exclude_filter  # Already a list from nargs='+'
 
-    # Load address cache if requested
-    address_cache = {}
-    if use_address_cache:
-        address_cache = load_address_cache()
-        if address_cache:
-            print(f"📍 Loaded {len(address_cache)} addresses from cache", file=sys.stderr)
-        else:
-            print(f"⚠️  Address cache not found or empty", file=sys.stderr)
-
     # Load override data if provided
     overrides = {}
     if override_files:
@@ -2084,6 +2491,14 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
             print(f"❌ Error parsing JSON in override file: {e}", file=sys.stderr)
             sys.exit(1)
 
+    # Load image inventory if provided
+    image_inventory = set()
+    new_images_found = set()
+    if image_inventory_file:
+        image_inventory = load_image_inventory(image_inventory_file)
+        if image_inventory:
+            print(f"📷 Loaded {len(image_inventory)} images from inventory: {image_inventory_file}", file=sys.stderr)
+
     # Determine if writing to stdout
     use_stdout = output_file is None or output_file == '-'
 
@@ -2092,6 +2507,8 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
     print(f"   Output: {'stdout' if use_stdout else output_file}", file=sys.stderr)
     if test_mode:
         print(f"   Mode:   TEST (first 5 rows only)", file=sys.stderr)
+    if not_test_mode:
+        print(f"   Mode:   NOT-TEST (skipping first 5 rows)", file=sys.stderr)
     if include_titles:
         print(f"   Include: Post titles = {', '.join(include_titles)}", file=sys.stderr)
     if exclude_titles:
@@ -2106,9 +2523,11 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         print(f"   Exclude: Categories = {', '.join(exclude_category_list)}", file=sys.stderr)
     if exclude_tags_list:
         print(f"   Exclude: Tags = {', '.join(exclude_tags_list)}", file=sys.stderr)
-    print(f"   Coords: neighborhoods.json mapping → geocoding → defaults", file=sys.stderr)
-    if filter_bb:
-        print(f"   Content: Beaver Builder tags will be filtered", file=sys.stderr)
+    if _LOCATION_DATA:
+        print(f"   Coords: neighborhood map → geocoding → defaults", file=sys.stderr)
+    else:
+        print(f"   Coords: geocoding → defaults (no --neighborhood-map specified)", file=sys.stderr)
+    print(f"   Content: HTML and Beaver Builder tags stripped", file=sys.stderr)
     if enable_default_address:
         print(f"   Address: Default '123 King Street' for empty addresses", file=sys.stderr)
     if pull_tabs:
@@ -2125,21 +2544,18 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
     with open(input_file, 'r', encoding='utf-8') as infile:
         reader = csv.DictReader(infile)
         
-        # GeoDirectory required column order
+        # GeoDirectory required column order (new format matching gd_place_dev.csv)
         fieldnames = [
             'ID', 'post_title', 'post_content', 'post_status', 'post_author',
             'post_type', 'post_date', 'post_modified', 'post_tags', 'post_category',
-            'default_category', 'featured', 'street', 'street2', 'city', 'region',
-            'country', 'zip', 'latitude', 'longitude', 'location', 'phone',
-            'website', 'website_url', 'email_', 'fixed_image', 'spotlight_link',
-            'featured_image_alignment', 'layout', 'facebook', 'twitter',
-            'instagram', 'pinterest', 'youtube', 'linkedin', 'trip_advisor',
-            'yelp', 'other_social_label', 'other_social_url', 'other_social_icon',
-            'tab1_name', 'tab1_html', 'tab2_name', 'tab2_html',
-            'tab3_name', 'tab3_html', 'tab4_name', 'tab4_html',
-            'tab5_name', 'tab5_html', 'youtube_url', 'youtube_urls', 'neighbourhood',
-            'post_images'
-            
+            'default_category', 'street', 'street2', 'city', 'region', 'country',
+            'zip', 'latitude', 'longitude', 'phone', 'alt_phone', 'email', 'website', 'twitter',
+            'facebook', 'book_online_url', 'youtube', 'linkedin', 'pinterest',
+            'trip_advisor', 'yelp', 'wedding_wire', 'extended_description', 'logo',
+            'featured', 'airbnb', 'cf360_tour', 'listing_size',
+            'neighbourhood', '_downloadable_media', 'claimed', 'bedrooms',
+            'instagram', 'google_business', 'vrbo', 'recommended_for', 'extras',
+            'locations', 'post_images'
         ]
         
         # Track file splitting if entries_per_file is set
@@ -2185,6 +2601,10 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 # Test mode - only process first 5 rows
                 if test_mode and processed_count >= 5:
                     break
+
+                # Not-test mode - skip first 5 rows
+                if not_test_mode and row_count <= 5:
+                    continue
 
                 # Apply post_title include filter
                 if include_titles:
@@ -2280,16 +2700,18 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 website = clean_url(website)
                 
                 # Choose best featured image and transform to relative path
-                featured_image = choose_best_value(
+                # Note: Image URL field may contain multiple pipe-separated URLs
+                featured_image_raw = choose_best_value(
                     row.get('Image URL', ''),
                     row.get('Attachment URL', '')
                 )
-                featured_image = transform_image_url(featured_image)
+                # Keep full URLs for GeoDirectory import (no transformation)
+                featured_image = featured_image_raw
 
                 # Get fixed image (skip numeric IDs)
                 fixed_image_raw = row.get('acf_fixed_image', '').strip()
                 if fixed_image_raw and not fixed_image_raw.isdigit():
-                    fixed_image = transform_image_url(clean_url(fixed_image_raw))
+                    fixed_image = clean_url(fixed_image_raw)
                 else:
                     fixed_image = ''
 
@@ -2311,8 +2733,8 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 # Get location-based data (coordinates, neighborhood, city)
                 location_name = row.get('acf_location', '').strip()
 
-                # Track unmapped locations for warning report
-                if location_name and location_name not in _LOCATION_DATA:
+                # Track unmapped locations for warning report (only when neighborhood map is loaded)
+                if _LOCATION_DATA and location_name and location_name not in _LOCATION_DATA:
                     unmapped_locations.add(location_name)
 
                 # Get full location data from neighborhoods.json mapping
@@ -2338,21 +2760,21 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                     if not lat or not lng:
                         lat, lng = get_default_coordinates()
 
-                # Get street address from cache if available (keyed by business name)
-                business_name = row.get('Title', '').strip()
-                street_address = address_cache.get(business_name, '')
+                # Street address (from override files if provided)
+                street_address = ''
 
                 # Apply default address if enabled and address is empty
                 if enable_default_address and not street_address:
                     street_address = '123 King Street'
 
-                # Get content and extract tabs
-                content = row.get('Content', '')
+                # STEP 1: Always process ORIGINAL content first (before overrides)
+                # This ensures extended_description gets the original content with images removed
+                original_content = row.get('Content', '')
 
-                # Extract tabs from content (only if pull_tabs is enabled)
+                # Extract tabs from original content (only if pull_tabs is enabled)
                 tab_fields = {}
                 if pull_tabs:
-                    tabs, content = parse_tabs(content, clean_out=clean_tab_contents)
+                    tabs, original_content = parse_tabs(original_content, clean_out=clean_tab_contents)
 
                     # Populate tab fields (up to 5 tabs)
                     for i in range(1, 6):  # tab1 through tab5
@@ -2369,13 +2791,26 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                         tab_fields[f'tab{i}_name'] = ''
                         tab_fields[f'tab{i}_html'] = ''
 
-                # Then filter Beaver Builder tags if enabled
-                if filter_bb:
-                    content = filter_beaver_builder_tags(content)
+                # Extract JPG URLs and YouTube URLs BEFORE stripping HTML
+                # (needs to parse img src and other HTML attributes)
+                jpg_urls_from_content = extract_jpg_urls_from_content(original_content)
+                youtube_urls_from_content = extract_youtube_urls_from_content(original_content)
 
-                # Extract JPG URLs and YouTube URLs from content
-                jpg_urls_from_content = extract_jpg_urls_from_content(content)
-                youtube_urls_from_content = extract_youtube_urls_from_content(content)
+                # Remove image references from original content for extended_description
+                # This preserves the original content (minus images) regardless of overrides
+                extended_description = remove_images_from_content(original_content)
+
+                # Strip Beaver Builder tags and all HTML from content and extended_description
+                original_content = strip_html_tags(filter_beaver_builder_tags(original_content))
+                extended_description = strip_html_tags(filter_beaver_builder_tags(extended_description))
+
+                # STEP 2: Determine post_content - can be overridden by acf_description
+                if row.get('acf_description', '').strip():
+                    # Override: use acf_description for post_content
+                    content = strip_html_tags(filter_beaver_builder_tags(row.get('acf_description', '')))
+                else:
+                    # No override: use the processed original content
+                    content = original_content
 
                 # Combine gallery images with JPG URLs from content
                 # Both are already in GeoDirectory format: URL|ID|TITLE|DESCRIPTION::URL|ID|TITLE|DESCRIPTION
@@ -2403,6 +2838,17 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                             # Use featured image as the only image
                             combined_images = formatted_featured
 
+                # Deduplicate images by basename, keeping the one with the latest date
+                # If same filename exists in /2021/05/ and /2023/11/, keep the 2023/11 version
+                if combined_images:
+                    combined_images = deduplicate_images_by_basename(combined_images)
+
+                # Track images for inventory (if enabled)
+                if image_inventory_file and combined_images:
+                    for url in extract_urls_from_geodir_format(combined_images):
+                        if url not in image_inventory:
+                            new_images_found.add(url)
+
                 # Track images for copy script
                 if image_script:
                     # Track images from post_images (combined_images)
@@ -2426,73 +2872,74 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                             if url:
                                 image_script.add_image(url)
 
+                # Parse phone numbers (may contain multiple separated by comma or pipe)
+                phone, alt_phone = parse_phone_numbers(row.get('acf_phone', ''))
+
                 # Build output row (ID will be set later after second-pass overrides)
+                # New GeoDirectory format matching gd_place export (48 fields)
                 output_row = {
                     'ID': row.get('id', ''),
                     'post_title': row.get('Title', ''),
                     'post_content': content,
                     'post_status': row.get('Status', 'publish'),
-                    'post_author': row.get('Author ID', '1'),
+                    'post_author': '1',
                     'post_type': post_type,  # Dynamic based on category's CPT
                     'post_date': format_datetime(row.get('Date', '')),
                     'post_modified': format_datetime(row.get('Post Modified Date', '')),
                     'post_tags': post_tags_ids,
                     'post_category': post_category_ids,
                     'default_category': default_category_id,
-                    'featured': '0',  # Change to '1' for featured listings
-                    
+
                     # Location fields (geographic)
                     'street': street_address,
                     'street2': '',
                     'city': mapped_city,
-                    'neighbourhood': neighborhood_slug,
-                    'region': 'United States Virgin Islands',
-                    'country': 'United States',
+                    'region': 'St Croix',
+                    'country': 'US Virgin Islands',
                     'zip': '',
                     'latitude': lat,
                     'longitude': lng,
-                    'location': row.get('acf_location', ''),  # Area/neighborhood
-                    
+
                     # Contact fields
-                    'phone': format_phone(row.get('acf_phone', '')),
+                    'phone': phone,
+                    'alt_phone': alt_phone,
+                    'email': row.get('acf_email', ''),  # Renamed from email_
                     'website': website,
-                    'website_url': website,
-                    'email_': row.get('acf_email', ''),
-                    
-                    # Display/layout fields
-                    'fixed_image': fixed_image,
-                    'spotlight_link': clean_url(row.get('acf_spotlight_link', '')),
-                    'featured_image_alignment': row.get('image_alignment', ''),
-                    'layout': row.get('acf_template_layout', ''),
-                    
+
                     # Social media fields
-                    'facebook': transform_social_url('facebook', row.get('acf_facebook', '')),
                     'twitter': transform_social_url('twitter', row.get('acf_twitter', '')),
-                    'instagram': transform_social_url('instagram', row.get('acf_instagram', '')),
-                    'pinterest': transform_social_url('pinterest', row.get('acf_pinterest', '')),
+                    'facebook': transform_social_url('facebook', row.get('acf_facebook', '')),
+                    'book_online_url': '',
                     'youtube': transform_social_url('youtube', row.get('acf_you_tube', '')),
                     'linkedin': transform_social_url('linkedin', row.get('acf_linked_in', '')),
+                    'pinterest': transform_social_url('pinterest', row.get('acf_pinterest', '')),
                     'trip_advisor': transform_social_url('trip_advisor', row.get('acf_trip_advisor', '')),
                     'yelp': transform_social_url('yelp', row.get('acf_yelp', '')),
-                    'other_social_label': row.get('acf_other_social_label', ''),
-                    'other_social_url': clean_url(row.get('acf_other_social_url', '')),
-                    'other_social_icon': '' if row.get('acf_other_social_icon', '').strip().isdigit() else row.get('acf_other_social_icon', ''),
+                    'wedding_wire': '',
+                    'instagram': transform_social_url('instagram', row.get('acf_instagram', '')),
+                    'google_business': '',
+                    'vrbo': '',
 
-                    # Tabs (extracted from content)
-                    'tab1_name': tab_fields['tab1_name'],
-                    'tab1_html': tab_fields['tab1_html'],
-                    'tab2_name': tab_fields['tab2_name'],
-                    'tab2_html': tab_fields['tab2_html'],
-                    'tab3_name': tab_fields['tab3_name'],
-                    'tab3_html': tab_fields['tab3_html'],
-                    'tab4_name': tab_fields['tab4_name'],
-                    'tab4_html': tab_fields['tab4_html'],
-                    'tab5_name': tab_fields['tab5_name'],
-                    'tab5_html': tab_fields['tab5_html'],
+                    # Extended content fields
+                    'extended_description': extended_description,
+                    'logo': '',
+                    'recommended_for': '',
+                    'extras': '',
+                    'locations': '',
 
-                    # YouTube URLs (extracted from content)
-                    'youtube_url': '',  # Single URL field (empty for now, can be populated if needed)
-                    'youtube_urls': youtube_urls_from_content,
+                    # Display/layout fields
+                    'featured': '0',
+                    'airbnb': '',
+                    'cf360_tour': '',
+                    'listing_size': transform_layout_to_listing_size(row.get('acf_template_layout', '')),
+                    'bedrooms': '',
+
+                    # Location/neighborhood
+                    'neighbourhood': neighborhood_slug,
+
+                    # Additional fields
+                    '_downloadable_media': '',  # New field - empty
+                    'claimed': '0',  # New field - default to unclaimed
 
                     # Image gallery (combined from gallery fields + JPG URLs in content)
                     'post_images': combined_images,
@@ -2501,6 +2948,17 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
                 # Apply second-pass overrides (GeoDirectory fields)
                 # This happens after transformation, allowing direct override of final output fields
                 output_row = apply_output_overrides(output_row, post_title, csv_categories, overrides)
+
+                # Map city from zip code when --neighborhood-map is not active
+                if not _LOCATION_DATA and output_row.get('zip'):
+                    zip_city = get_city_from_zip(output_row['zip'])
+                    if zip_city:
+                        output_row['city'] = zip_city
+
+                # Map multiselect field values from labels to slugs and normalize separators
+                for ms_field in ('recommended_for', 'extras', 'locations'):
+                    if output_row.get(ms_field):
+                        output_row[ms_field] = map_multiselect_values(ms_field, output_row[ms_field])
 
                 # Check if we need to start a new file
                 if entries_per_file and entries_in_current_file >= entries_per_file:
@@ -2534,9 +2992,18 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
         print(f"   ⚠️  Unmapped tags ({len(unmapped_tags)}): {', '.join(sorted(unmapped_tags))}", file=sys.stderr)
     if unmapped_locations:
         print(f"   ⚠️  Unmapped locations ({len(unmapped_locations)}):", file=sys.stderr)
-        print(f"      Add entries to neighborhoods.json for these acf_location values:", file=sys.stderr)
+        print(f"      Add entries to the --neighborhood-map file for these acf_location values:", file=sys.stderr)
         for loc in sorted(unmapped_locations):
             print(f"        - {loc}", file=sys.stderr)
+
+    # Save image inventory if enabled
+    if image_inventory_file:
+        # Merge new images with existing inventory
+        updated_inventory = image_inventory | new_images_found
+        save_image_inventory(image_inventory_file, updated_inventory)
+        if new_images_found:
+            print(f"   📷 New images added to inventory: {len(new_images_found)}", file=sys.stderr)
+        print(f"   📷 Total images in inventory: {len(updated_inventory)}", file=sys.stderr)
 
     if not use_stdout:
         if entries_per_file and len(output_files_created) > 1:
@@ -2556,6 +3023,8 @@ def transform_csv(input_file, output_file, test_mode=False, category_filter=None
     if test_mode:
         print("⚠️  TEST MODE: Only first 5 rows were processed", file=sys.stderr)
         print("   Run without --test flag to process all rows", file=sys.stderr)
+    if not_test_mode:
+        print("⚠️  NOT-TEST MODE: First 5 rows were skipped", file=sys.stderr)
     
     return True
 
@@ -2572,7 +3041,6 @@ Transform Pipeline
 ├── 1. LOAD CONFIGURATION
 │   ├── gd-taxonomy-cpts.json ─── CPTs, categories, aliases, tags
 │   ├── neighborhoods.json ────── Location → city, lat/lng, neighborhood
-│   ├── address_cache.json ────── Business name → street address (optional)
 │   └── override files ─────────── Field overrides per listing (optional)
 │
 ├── 2. READ INPUT
@@ -2643,62 +3111,63 @@ Transform Pipeline
     print(f"{'Tags':<30} {'post_tags':<25} {'Text names → IDs':<25}")
     print(f"{'Categories':<30} {'post_category':<25} {'Text names → IDs':<25}")
     print(f"{'Categories':<30} {'default_category':<25} {'First ID from post_category':<25}")
-    print(f"{'(hardcoded)':<30} {'featured':<25} {'0 (not featured)':<25}")
 
     # Location fields
     print(f"\n{'LOCATION FIELDS':<80}")
     print("-"*80)
-    print(f"{'post_title (cache lookup)':<30} {'street':<25} {'From address_cache.json':<25}")
+    print(f"{'(from override)':<30} {'street':<25} {'From override files':<25}")
     print(f"{'(hardcoded)':<30} {'street2':<25} {'Empty':<25}")
-    print(f"{'(hardcoded)':<30} {'city':<25} {'St. Croix':<25}")
-    print(f"{'acf_location':<30} {'neighbourhood':<25} {'Location → slug lookup':<25}")
-    print(f"{'(hardcoded)':<30} {'region':<25} {'United States Virgin Islands':<25}")
-    print(f"{'(hardcoded)':<30} {'country':<25} {'United States':<25}")
+    print(f"{'acf_location':<30} {'city':<25} {'From neighborhoods.json':<25}")
+    print(f"{'(hardcoded)':<30} {'region':<25} {'St Croix':<25}")
+    print(f"{'(hardcoded)':<30} {'country':<25} {'US Virgin Islands':<25}")
     print(f"{'(hardcoded)':<30} {'zip':<25} {'Empty':<25}")
     print(f"{'acf_location':<30} {'latitude':<25} {'Location lookup':<25}")
     print(f"{'acf_location':<30} {'longitude':<25} {'Location lookup':<25}")
-    print(f"{'acf_location':<30} {'location':<25} {'Area/neighborhood':<25}")
+    print(f"{'acf_location':<30} {'neighbourhood':<25} {'Location → slug lookup':<25}")
 
     # Contact fields
     print(f"\n{'CONTACT FIELDS':<80}")
     print("-"*80)
-    print(f"{'acf_phone':<30} {'phone':<25} {'340-555-1234 format':<25}")
+    print(f"{'acf_phone':<30} {'phone, alt_phone':<25} {'(xxx)xxx-xxxx format; splits on comma/pipe':<25}")
+    print(f"{'acf_email':<30} {'email':<25} {'':<25}")
     print(f"{'acf_website | website_url':<30} {'website':<25} {'URL cleaned':<25}")
-    print(f"{'acf_website | website_url':<30} {'website_url':<25} {'URL cleaned':<25}")
-    print(f"{'acf_email':<30} {'email_':<25} {'':<25}")
 
     # Display/layout fields
     print(f"\n{'DISPLAY/LAYOUT FIELDS':<80}")
     print("-"*80)
-    print(f"{'acf_fixed_image':<30} {'fixed_image':<25} {'URL cleaned':<25}")
-    print(f"{'acf_spotlight_link':<30} {'spotlight_link':<25} {'URL cleaned':<25}")
-    print(f"{'image_alignment':<30} {'featured_image_alignment':<25} {'':<25}")
-    print(f"{'acf_template_layout':<30} {'layout':<25} {'':<25}")
+    print(f"{'acf_template_layout':<30} {'listing_size':<25} {'wide→Large, small→Medium, narrow→Small':<25}")
+    print(f"{'(hardcoded)':<30} {'featured':<25} {'0 (not featured)':<25}")
+    print(f"{'(hardcoded)':<30} {'claimed':<25} {'0 (unclaimed)':<25}")
     print(f"{'images | slider':<30} {'post_images':<25} {'Pipe-separated':<25}")
 
     # Social media fields
     print(f"\n{'SOCIAL MEDIA FIELDS':<80}")
     print("-"*80)
-    print(f"{'acf_facebook':<30} {'facebook':<25} {'Username → URL':<25}")
     print(f"{'acf_twitter':<30} {'twitter':<25} {'Username → URL':<25}")
+    print(f"{'acf_facebook':<30} {'facebook':<25} {'Username → URL':<25}")
     print(f"{'acf_instagram':<30} {'instagram':<25} {'Username → URL':<25}")
-    print(f"{'acf_pinterest':<30} {'pinterest':<25} {'Username → URL':<25}")
+    print(f"{'(empty)':<30} {'book_online_url':<25} {'Empty':<25}")
+    print(f"{'(empty)':<30} {'google_business':<25} {'Empty':<25}")
     print(f"{'acf_you_tube':<30} {'youtube':<25} {'@username → URL':<25}")
     print(f"{'acf_linked_in':<30} {'linkedin':<25} {'Smart URL':<25}")
+    print(f"{'acf_pinterest':<30} {'pinterest':<25} {'Username → URL':<25}")
     print(f"{'acf_trip_advisor':<30} {'trip_advisor':<25} {'Username → URL':<25}")
     print(f"{'acf_yelp':<30} {'yelp':<25} {'Username → URL':<25}")
-    print(f"{'acf_other_social_label':<30} {'other_social_label':<25} {'':<25}")
-    print(f"{'acf_other_social_url':<30} {'other_social_url':<25} {'URL cleaned':<25}")
-    print(f"{'acf_other_social_icon':<30} {'other_social_icon':<25} {'':<25}")
+    print(f"{'(empty)':<30} {'wedding_wire':<25} {'Empty':<25}")
 
-    # Tab extraction (from Beaver Builder content)
-    print(f"\n{'TAB EXTRACTION (BEAVER BUILDER)':<80}")
+    # Additional fields
+    print(f"\n{'ADDITIONAL FIELDS':<80}")
     print("-"*80)
-    print(f"{'Extracted from Content':<30} {'tab1_name, tab1_html':<30} {'Up to 5 tabs':<25}")
-    print(f"{'--clean-tab-contents flag':<30} {'tab2_name, tab2_html':<30} {'Controls extraction':<25}")
-    print(f"{'':<30} {'tab3_name, tab3_html':<30} {'':<25}")
-    print(f"{'':<30} {'tab4_name, tab4_html':<30} {'':<25}")
-    print(f"{'':<30} {'tab5_name, tab5_html':<30} {'':<25}")
+    print(f"{'Content (images removed)':<30} {'extended_description':<25} {'Cleaned post content':<25}")
+    print(f"{'(empty)':<30} {'logo':<25} {'Business logo':<25}")
+    print(f"{'(empty)':<30} {'recommended_for':<25} {'Recommended for (comma-separated)':<25}")
+    print(f"{'(empty)':<30} {'extras':<25} {'Extras (comma-separated)':<25}")
+    print(f"{'(empty)':<30} {'locations':<25} {'Neighborhoods (comma-separated)':<25}")
+    print(f"{'(empty)':<30} {'airbnb':<25} {'Airbnb listing URL':<25}")
+    print(f"{'(empty)':<30} {'vrbo':<25} {'VRBO listing URL':<25}")
+    print(f"{'(empty)':<30} {'cf360_tour':<25} {'360 tour URL':<25}")
+    print(f"{'(empty)':<30} {'bedrooms':<25} {'Number of bedrooms':<25}")
+    print(f"{'(empty)':<30} {'_downloadable_media':<25} {'Downloadable media':<25}")
 
     print("="*80)
     print()
@@ -2758,13 +3227,20 @@ Transform Pipeline
     print(f"Maps ACF location values to GeoDirectory location fields")
     print(f"Used to populate: neighbourhood, city, latitude, longitude")
     print()
-    print("PRIORITY (highest to lowest):")
+    print("⚠️  OPTION REQUIRED: Neighborhood mapping is only applied during transformation")
+    print("   when --neighborhood-map <file> is passed on the command line.")
+    print("   Without this option, no neighborhood mapping is performed and all")
+    print("   neighbourhood/city/coordinate values from this file are ignored.")
+    print()
+    print("   Example: transform.py --neighborhood-map neighborhoods.json ...")
+    print()
+    print("PRIORITY (highest to lowest, when --neighborhood-map is active):")
     print("  1. neighborhoods.json mapping  - OVERRIDES all other sources")
     print("  2. Geocoding service lookup")
     print("  3. Default coordinates (St. Croix center)")
     print()
-    print("IMPORTANT: Every acf_location value in the source CSV should have")
-    print("           a corresponding entry in neighborhoods.json")
+    print("NOTE: Every acf_location value in the source CSV should have")
+    print("      a corresponding entry in the neighborhood map file")
     print()
 
     # Check for validation warnings first
@@ -2883,10 +3359,17 @@ def main():
         default=None,
         help='Output GeoDirectory import CSV file (default: stdout)'
     )
-    parser.add_argument(
+    test_group = parser.add_mutually_exclusive_group()
+    test_group.add_argument(
         '--test',
         action='store_true',
         help='Test mode: only process first 5 rows'
+    )
+    test_group.add_argument(
+        '--not-test',
+        action='store_true',
+        dest='not_test',
+        help='Skip first 5 rows (process everything except what --test would process)'
     )
     parser.add_argument(
         '--mapping',
@@ -2942,16 +3425,6 @@ def main():
         '--skip-geocoding',
         action='store_true',
         help='Use St. Croix center coordinates (prevents OpenStreetMap geocoding errors)'
-    )
-    parser.add_argument(
-        '--use-address-cache',
-        action='store_true',
-        help='Load street addresses from address_cache.json file'
-    )
-    parser.add_argument(
-        '--filter-bb',
-        action='store_true',
-        help='Filter out Beaver Builder tags from post content'
     )
     parser.add_argument(
         '--clean-tab-contents',
@@ -3010,6 +3483,19 @@ def main():
         action='store_true',
         help='Extract tab data from content and populate tab fields (tab1_name, tab1_html, etc.). If not specified, tab fields will be empty.'
     )
+    parser.add_argument(
+        '--image-file',
+        type=str,
+        dest='image_file',
+        help='JSON file to maintain a running inventory of deduplicated image references. Creates file if it does not exist. New images are added to the inventory on each run.'
+    )
+    parser.add_argument(
+        '--neighborhood-map',
+        type=str,
+        dest='neighborhood_map',
+        metavar='FILE',
+        help='JSON file for mapping ACF location values to GeoDirectory neighbourhood, city, and coordinates (e.g., neighborhoods.json). If not specified, no neighborhood mapping is performed.'
+    )
 
     args = parser.parse_args()
 
@@ -3020,8 +3506,16 @@ def main():
     # Load the CPT-based taxonomy (categories, aliases, tags)
     load_cpt_taxonomy("gd-taxonomy-cpts.json")
 
-    # Load the location to neighborhood mapping
-    load_location_hood_map("neighborhoods.json")
+    # Load the location to neighborhood mapping only if --neighborhood-map is specified.
+    # For --mapping display, always load neighborhoods.json as a reference (with disclaimer shown).
+    if args.neighborhood_map:
+        load_location_hood_map(args.neighborhood_map)
+    elif args.mapping:
+        # Load neighborhoods.json for display purposes only
+        try:
+            load_location_hood_map("neighborhoods.json")
+        except FileNotFoundError:
+            pass  # Not critical; display will note file not found
 
     # Handle info/list flags (mutually exclusive with transformation)
     if args.mapping:
@@ -3059,14 +3553,13 @@ def main():
             args.acf,
             args.out,
             test_mode=args.test,
+            not_test_mode=args.not_test,
             category_filter=args.category,
             tags_filter=args.tags,
             layouts_filter=args.layouts,
             exclude_categories=args.exclude_categories,
             exclude_tags=args.exclude_tags,
             skip_geocoding=args.skip_geocoding,
-            use_address_cache=args.use_address_cache,
-            filter_bb=args.filter_bb,
             enable_default_address=args.enable_default_address,
             image_script=image_script,
             clean_tab_contents=args.clean_tab_contents,
@@ -3074,7 +3567,8 @@ def main():
             exclude_filter=args.exclude,
             entries_per_file=args.entries,
             override_files=args.override_files,
-            pull_tabs=args.pull_tabs
+            pull_tabs=args.pull_tabs,
+            image_inventory_file=args.image_file
         )
 
         # Write copy script if initialized

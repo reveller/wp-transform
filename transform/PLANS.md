@@ -1,11 +1,6 @@
-Continue with what you were doing.
-
-Filter out beaver builder tags from content, such as '<!-- wp:fl-builder/layout -->'.
-
-Use a default address of '123 King Street' if one is not provided.
-
-We need a new mapping for Categories and Tags in an external json file (already
-created and named categories_and_tags.json), including a name (from the ACF 
-custom fields) to an id. Categories are not text based. GeoDirectory must use 
-an internal map. For example: Uncategorized is 2040. Play is 2041. Scuba is 
-2042. Eat is 2043. 
+Please refactor this code, specifically around the handling of json mapping
+files. I have two json mapping files - gd-taxonomy-map.json and
+neighborhoods.json. They are each used to lookup one type of value to another.
+The taxonomy mapping code is complete. I started to write another neighborhood
+lookup. The current code uses globals to cache the mappings. Please review the
+code and ask questions before making any changes.

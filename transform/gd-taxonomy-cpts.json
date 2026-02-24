@@ -1,0 +1,2749 @@
+{
+  "_comment": "CPT-based taxonomy structure with custom field definitions.",
+  "_field_types": "text, textarea, html, select, multiselect, radio, checkbox, url, phone, email, file, files, datepicker, time",
+  "_merge_info": {
+    "generated": "2026-02-10 16:32:11",
+    "user_file": "gd-taxonomy-cpts.json",
+    "dev_file": "gd-export-dev.json",
+    "strategy": "user=structure/aliases/categories, dev=IDs/tags/fields/new CPTs"
+  },
+  "common_fields": [
+    {
+      "htmlvar_name": "post_title",
+      "label": "Title",
+      "field_type": "text",
+      "is_required": true,
+      "show_in": [
+        "[mapbubble]"
+      ],
+      "field_icon": "fas fa-minus",
+      "sort_order": 1
+    },
+    {
+      "htmlvar_name": "post_category",
+      "label": "Category",
+      "field_type": "categories",
+      "is_required": true,
+      "show_in": [
+        "[detail]"
+      ],
+      "field_icon": "fas fa-folder-open",
+      "sort_order": 2
+    },
+    {
+      "_group": "Contact Information",
+      "htmlvar_name": "phone",
+      "label": "Phone",
+      "field_type": "phone",
+      "description": "Primary contact phone number",
+      "placeholder": "(340) 555-1234",
+      "is_required": false,
+      "show_in": [
+        "[detail]",
+        "[mapbubble]"
+      ],
+      "sort_order": 5
+    },
+    {
+      "htmlvar_name": "alt_phone",
+      "label": "Alternate Phone",
+      "field_type": "phone",
+      "description": "Alternate contact phone number",
+      "placeholder": "(340) 555-1234",
+      "is_required": false,
+      "show_in": [
+        "[detail]",
+        "[mapbubble]"
+      ],
+      "sort_order": 6
+    },
+    {
+      "htmlvar_name": "website",
+      "label": "Website",
+      "field_type": "url",
+      "description": "Business website URL",
+      "placeholder": "https://example.com",
+      "is_required": false,
+      "show_in": [
+        "[detail]"
+      ],
+      "sort_order": 7
+    },
+    {
+      "htmlvar_name": "address",
+      "label": "Address",
+      "field_type": "address",
+      "is_required": false,
+      "show_in": [
+        "[detail]",
+        "[mapbubble]"
+      ],
+      "field_icon": "fas fa-map-marker-alt",
+      "sort_order": 12
+    },
+    {
+      "htmlvar_name": "locations",
+      "label": "Locations",
+      "field_type": "multiselect",
+      "options": "Christiansted/christiansted\r\nNorth Shore/north-shore\r\nFrederiksted/frederiksted\r\nWest End/west-end\r\nEast End/east-end\r\nMid Island/mid-island\r\nIsland Wide/island-wide",
+      "is_required": true,
+      "show_in": [],
+      "sort_order": 13,
+      "_rename_from": [
+        "neighborhoods"
+      ]
+    },
+    {
+      "htmlvar_name": "instagram",
+      "label": "Instagram",
+      "field_type": "url",
+      "is_required": false,
+      "show_in": [],
+      "sort_order": 15,
+      "description": "Instagram profile URL",
+      "placeholder": "https://instagram.com/yourhandle"
+    },
+    {
+      "htmlvar_name": "post_content",
+      "label": "Description",
+      "field_type": "textarea",
+      "is_required": true,
+      "show_in": [],
+      "field_icon": "fas fa-minus",
+      "sort_order": 24
+    },
+    {
+      "htmlvar_name": "logo",
+      "label": "Logo",
+      "field_type": "file",
+      "is_required": false,
+      "show_in": [],
+      "field_icon": "far fa-image",
+      "sort_order": 26
+    },
+    {
+      "htmlvar_name": "post_images",
+      "label": "Images",
+      "field_type": "images",
+      "is_required": false,
+      "show_in": [],
+      "field_icon": "far fa-image",
+      "sort_order": 27
+    },
+    {
+      "htmlvar_name": "cf360_tour",
+      "label": "360 Tour",
+      "field_type": "html",
+      "is_required": false,
+      "show_in": [],
+      "sort_order": 28
+    },
+    {
+      "htmlvar_name": "recommended_for",
+      "label": "Recommended for:",
+      "field_type": "multiselect",
+      "options": "Family Friendly/family-friendly\r\nCruise Friendly/cruise-friendly\r\nRomance/romance\r\nRelaxation/relaxation\r\nAdventure/adventure\r\nSports and Fitness/sports-fitness\r\nFood and Drink/food-drink\r\nArts and Culture/arts-culture\r\nEntertainment/entertainment\r\nWeddings and Events/weddings-events\r\nLGBTQ+/lgbtq\r\nResidents/residents\r\nRelocation/relocation\r\nHistory and Heritage/history-heritage",
+      "is_required": false,
+      "show_in": [],
+      "sort_order": 32,
+      "_rename_from": [
+        "recommended_for_"
+      ]
+    },
+    {
+      "htmlvar_name": "extras",
+      "label": "Extras",
+      "field_type": "multiselect",
+      "options": "Book Online/book-online\r\n360 Tour/360-tour\r\nOnsite Parking/onsite-parking\r\nHistoric Site/historic-site\r\nAccessible / ADA/ada-accessible\r\nScenic Views/scenic-views\r\nParks and Attractions/parks-attractions\r\nSt. Croix 100/stx-100\r\nPet Friendly/pet-friendly\r\nMilitary Discount/military-discount\r\nTours/tours\r\nVolunteer/volunteer\r\nSustainable/sustainable",
+      "is_required": false,
+      "show_in": [],
+      "sort_order": 33,
+      "_rename_from": [
+        "details",
+        "details_",
+        "features"
+      ]
+    },
+    {
+      "htmlvar_name": "post_tags",
+      "label": "Tags",
+      "field_type": "tags",
+      "is_required": true,
+      "show_in": [
+        "[detail]"
+      ],
+      "field_icon": "fas fa-tags",
+      "sort_order": 29
+    }
+  ],
+  "cpts": [
+    {
+      "cpt": "Places to Stay",
+      "post_type": "gd_place",
+      "slug": "places-to-stay",
+      "categories": [
+        {
+          "name": "Resorts + Hotels",
+          "staging_id": 2094,
+          "id": 4,
+          "staging_slug": "resorts-hotels",
+          "slug": "resorts-hotels",
+          "aliases": [
+            "Hotels",
+            "Hotels and Inns",
+            "Resorts",
+            "Cottages",
+            "Small Inns"
+          ]
+        },
+        {
+          "name": "Vacation Rentals",
+          "staging_id": 2095,
+          "id": 7,
+          "staging_slug": "vacation-rentals",
+          "slug": "vacation-rentals",
+          "aliases": [
+            "1-2 Bedroom Rentals",
+            "3-4 Bedroom Rentals",
+            "5+ Bedroom Rentals",
+            "Vacation Rentals and Villas",
+            "Rental Agents"
+          ]
+        },
+        {
+          "name": "Campgrounds + Eco",
+          "staging_id": 2096,
+          "id": 9,
+          "staging_slug": "campgrounds-eco",
+          "slug": "campgrounds-eco",
+          "aliases": [
+            "Campgrounds"
+          ]
+        },
+        {
+          "name": "Hotels",
+          "id": 4,
+          "slug": "hotels",
+          "aliases": [],
+          "_source": "dev_export"
+        }
+      ],
+      "tags": [
+        {
+          "name": "Adult Only",
+          "id": 141,
+          "slug": "adult-only"
+        },
+        {
+          "name": "Beachfront",
+          "id": 142,
+          "slug": "beachfront"
+        },
+        {
+          "name": "Concierge",
+          "id": 143,
+          "slug": "concierge"
+        },
+        {
+          "name": "Day Pass",
+          "id": 144,
+          "slug": "day-pass"
+        },
+        {
+          "name": "East End",
+          "id": 331,
+          "slug": "east-end"
+        },
+        {
+          "name": "Fitness Center",
+          "id": 145,
+          "slug": "fitness-center"
+        },
+        {
+          "name": "Frederiksted",
+          "id": 327,
+          "slug": "frederiksted"
+        },
+        {
+          "name": "Island Wide",
+          "id": 314,
+          "slug": "island-wide"
+        },
+        {
+          "name": "Kitchenette",
+          "id": 146,
+          "slug": "kitchenette"
+        },
+        {
+          "name": "Pcoket Map",
+          "id": 316,
+          "slug": "pocket-map"
+        },
+        {
+          "name": "Meeting Space",
+          "id": 147,
+          "slug": "meeting-space"
+        },
+        {
+          "name": "North Shore",
+          "id": 315,
+          "slug": "north-shore"
+        },
+        {
+          "name": "Pool",
+          "id": 148,
+          "slug": "pool"
+        },
+        {
+          "name": "Restaurant On Site",
+          "id": 149,
+          "slug": "restaurant-onsite"
+        },
+        {
+          "name": "Spa On Site",
+          "id": null,
+          "slug": "spa-onsite"
+        },
+        {
+          "name": "Sustainable Tourism",
+          "id": 322,
+          "slug": "sustainable-tourism"
+        },
+        {
+          "name": "Take Over",
+          "id": 150,
+          "slug": "take-over"
+        },
+        {
+          "name": "West End",
+          "id": 323,
+          "slug": "west-end"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "bedrooms",
+          "label": "Bedrooms",
+          "field_type": "multiselect",
+          "options": "1-2 Bedrooms\r\n3-4 Bedrooms\r\n5+ Bedrooms",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 3
+        },
+        {
+          "htmlvar_name": "listing_size",
+          "label": "Listing Size",
+          "field_type": "multiselect",
+          "options": "Large\r\nMedium\r\nSmall\r\nComp",
+          "is_required": true,
+          "show_in": [],
+          "sort_order": 4
+        },
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 8
+        },
+        {
+          "htmlvar_name": "airbnb",
+          "label": "AirBnB",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 9
+        },
+        {
+          "htmlvar_name": "vrbo",
+          "label": "VRBO",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 10
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 11
+        },
+        {
+          "_group": "Social Media",
+          "htmlvar_name": "facebook",
+          "label": "Facebook",
+          "field_type": "url",
+          "description": "Facebook page URL",
+          "placeholder": "https://facebook.com/yourpage",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 14
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 16,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "yelp",
+          "label": "Yelp",
+          "field_type": "url",
+          "description": "Yelp listing URL",
+          "placeholder": "https://yelp.com/biz/...",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 18,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "description": "LinkedIn profile/company URL",
+          "placeholder": "https://linkedin.com/company/yourcompany",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 19,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "description": "Pinterest profile URL",
+          "placeholder": "https://pinterest.com/yourprofile",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 20
+        },
+        {
+          "htmlvar_name": "twitter",
+          "label": "Twitter/X",
+          "field_type": "url",
+          "description": "Twitter/X profile URL",
+          "placeholder": "https://twitter.com/yourhandle",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "description": "TripAdvisor listing URL",
+          "placeholder": "https://tripadvisor.com/...",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 22
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 23,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 25,
+          "_rename_from": [
+            "extended_description_",
+            "enter_extended_description"
+          ]
+        },
+        {
+          "htmlvar_name": "_downloadable_media",
+          "label": "Downloadable Media",
+          "field_type": "file",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 30
+        },
+        {
+          "htmlvar_name": "featured",
+          "label": "Featured",
+          "field_type": "checkbox",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 31
+        }
+      ],
+      "staging_slug": "stay"
+    },
+    {
+      "cpt": "Things to Do",
+      "post_type": "gd_thingstodo",
+      "slug": "things-to-do",
+      "categories": [
+        {
+          "name": "Land Activities",
+          "staging_id": 2098,
+          "id": 112,
+          "staging_slug": "land-activities",
+          "slug": "land-activities",
+          "aliases": [
+            "Adventure Tours",
+            "Family Activities",
+            "Golf and Tennis",
+            "Guided Tours",
+            "Hiking and Biking",
+            "Hiking Trails",
+            "Nightlife and Entertainment",
+            "Casino",
+            "Tasting Tours",
+            "Distilleries and Breweries",
+            "Horseback Riding",
+            "Historic Sites",
+            "National Parks",
+            "Parks and Historic Attractions",
+            "Tennis"
+          ]
+        },
+        {
+          "name": "Water Activities",
+          "staging_id": 2099,
+          "id": 117,
+          "staging_slug": "water-activities",
+          "slug": "water-activities",
+          "aliases": [
+            "Sailing and Boat Charters",
+            "Scuba Diving",
+            "St. Croix Dive Sites",
+            "Sport Fishing",
+            "Buck Island",
+            "Kayaking",
+            "Water Sports"
+          ]
+        },
+        {
+          "name": "Spa + Wellness",
+          "staging_id": 2101,
+          "id": 119,
+          "staging_slug": "spa-wellness",
+          "slug": "spa-wellness",
+          "aliases": [
+            "Beauty",
+            "Massage and Spa",
+            "Yoga and Fitness"
+          ]
+        },
+        {
+          "name": "Arts + Culture",
+          "staging_id": 2102,
+          "id": 120,
+          "staging_slug": "arts-culture",
+          "slug": "arts-culture",
+          "aliases": [
+            "Art Thursday",
+            "Art and Galleries",
+            "Arts and Culture"
+          ]
+        },
+        {
+          "name": "Weddings + Special Events",
+          "staging_id": 2347,
+          "id": 121,
+          "staging_slug": "weddings-special-events",
+          "slug": "weddings-special-events",
+          "aliases": [
+            "Party Rentals + Event Entertainment",
+            "Venues and Sites",
+            "Conference Spaces",
+            "Wedding and Event Vendors",
+            "Retreats",
+            "Photography and Video",
+            "Planners and Officiants"
+          ]
+        },
+        {
+          "name": "Shopping",
+          "staging_id": 2348,
+          "id": 118,
+          "staging_slug": "shop",
+          "slug": "shopping",
+          "aliases": [
+            "Island Jewelry",
+            "Lifestyle + Gifts",
+            "Lifestyle and Gifts",
+            "St. Croix Posters",
+            "Boutiques and Stores"
+          ]
+        },
+        {
+          "name": "Attractions",
+          "id": 200,
+          "slug": "attractions",
+          "aliases": [],
+          "_source": "dev_export"
+        }
+      ],
+      "tags": [
+        {
+          "name": "Adventure",
+          "id": 176,
+          "slug": "adventure"
+        },
+        {
+          "name": "ATV and Off Road",
+          "id": 182,
+          "slug": "atv-off-road"
+        },
+        {
+          "name": "Bike",
+          "id": 177,
+          "slug": "bike"
+        },
+        {
+          "name": "Boating",
+          "id": 185,
+          "slug": "boating"
+        },
+        {
+          "name": "Casino",
+          "id": 186,
+          "slug": "casino"
+        },
+        {
+          "name": "Center",
+          "id": 273,
+          "slug": "center"
+        },
+        {
+          "name": "Culinary and Tasting",
+          "id": 187,
+          "slug": "culinary-tasting"
+        },
+        {
+          "name": "Distillery and Brewery",
+          "id": 188,
+          "slug": "distillery-brewery"
+        },
+        {
+          "name": "Golf",
+          "id": 190,
+          "slug": "golf"
+        },
+        {
+          "name": "Hike",
+          "id": 189,
+          "slug": "hike"
+        },
+        {
+          "name": "Horseback",
+          "id": 178,
+          "slug": "horseback"
+        },
+        {
+          "name": "Jet Ski",
+          "id": 179,
+          "slug": "jet-ski"
+        },
+        {
+          "name": "Kayak",
+          "id": 184,
+          "slug": "kayak"
+        },
+        {
+          "name": "Museum",
+          "id": 192,
+          "slug": "museum"
+        },
+        {
+          "name": "Nightlife",
+          "id": 193,
+          "slug": "nightlife"
+        },
+        {
+          "name": "Paddle Sports",
+          "id": 181,
+          "slug": "paddle-sports"
+        },
+        {
+          "name": "Parasail",
+          "id": 180,
+          "slug": "parasail"
+        },
+        {
+          "name": "Tag",
+          "id": 272,
+          "slug": "tag"
+        },
+        {
+          "name": "Tag1",
+          "id": 297,
+          "slug": "tag1"
+        },
+        {
+          "name": "Tags",
+          "id": 209,
+          "slug": "tags"
+        },
+        {
+          "name": "Tennis and Pickleball",
+          "id": 191,
+          "slug": "tennis-pickeball"
+        },
+        {
+          "name": "Zipline",
+          "id": 183,
+          "slug": "zipline"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 8
+        },
+        {
+          "_group": "Social Media",
+          "htmlvar_name": "facebook",
+          "label": "Facebook",
+          "field_type": "url",
+          "description": "Facebook page URL",
+          "placeholder": "https://facebook.com/yourpage",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fas fa-external-link-alt",
+          "sort_order": 14
+        },
+        {
+          "htmlvar_name": "twitter",
+          "label": "Twitter/X",
+          "field_type": "url",
+          "description": "Twitter/X profile URL",
+          "placeholder": "https://twitter.com/yourhandle",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fab fa-twitter",
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "description": "LinkedIn profile/company URL",
+          "placeholder": "https://linkedin.com/company/yourcompany",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "description": "Pinterest profile URL",
+          "placeholder": "https://pinterest.com/yourprofile",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 20
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "description": "TripAdvisor listing URL",
+          "placeholder": "https://tripadvisor.com/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22
+        },
+        {
+          "htmlvar_name": "yelp",
+          "label": "Yelp",
+          "field_type": "url",
+          "description": "Yelp listing URL",
+          "placeholder": "https://yelp.com/biz/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 16,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 23,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "featured",
+          "label": "Featured",
+          "field_type": "checkbox",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 31
+        },
+        {
+          "htmlvar_name": "business_hours",
+          "label": "Business Hours",
+          "field_type": "business_hours",
+          "is_required": false,
+          "show_in": [
+            "[owntab]",
+            "[detail]"
+          ],
+          "field_icon": "fas fa-clock",
+          "sort_order": 37
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 11
+        },
+        {
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 25,
+          "_rename_from": [
+            "extended_description_",
+            "enter_extended_description"
+          ]
+        },
+        {
+          "htmlvar_name": "_downloadable_media",
+          "label": "Downloadable Media",
+          "field_type": "file",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 30
+        }
+      ],
+      "staging_slug": "play"
+    },
+    {
+      "cpt": "Food and Drink",
+      "post_type": "gd_foodanddrink",
+      "slug": "food-and-drink",
+      "categories": [
+        {
+          "name": "Restaurants + Bars",
+          "staging_id": 2104,
+          "id": 122,
+          "staging_slug": "restaurants",
+          "slug": "restaurants-bars",
+          "aliases": [
+            "Christiansted Restaurants",
+            "Craft Cocktails + Lounges",
+            "East End Restaurants",
+            "Food Trucks",
+            "Frederiksted Restaurants",
+            "Mid Island Restaurants",
+            "North Shore Restaurants"
+          ]
+        },
+        {
+          "name": "Coffee Shops + Sweets",
+          "staging_id": 2105,
+          "id": 123,
+          "staging_slug": "coffee-shops-sweets",
+          "slug": "coffee-shops-sweets",
+          "aliases": [
+            "Coffee + Sweets"
+          ]
+        },
+        {
+          "name": "Markets + Farm Stands",
+          "staging_id": 2106,
+          "id": 124,
+          "staging_slug": "markets-farm-stands",
+          "slug": "markets-farm-stands",
+          "aliases": [
+            "Farm Stands",
+            "Food Shopping"
+          ]
+        },
+        {
+          "name": "Catering + Chefs",
+          "staging_id": 2107,
+          "id": 113,
+          "staging_slug": "catering-chefs",
+          "slug": "catering-chefs",
+          "aliases": [
+            "Catering",
+            "Catering, Chefs, Desserts",
+            "Chefs",
+            "Desserts"
+          ]
+        },
+        {
+          "name": "Food and Drink Experiences",
+          "staging_id": 2107,
+          "id": 465,
+          "staging_slug": "food-drink-experiences",
+          "slug": "food-drink-experiences",
+          "aliases": [
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "Air-Conditioning",
+          "id": 163,
+          "slug": "air-conditioning"
+        },
+        {
+          "name": "Breakfast",
+          "id": 151,
+          "slug": "breakfast"
+        },
+        {
+          "name": "Brunch",
+          "id": 152,
+          "slug": "brunch"
+        },
+        {
+          "name": "Catering",
+          "id": 158,
+          "slug": "catering"
+        },
+        {
+          "name": "Cocktail Lounge",
+          "id": 156,
+          "slug": "cocktail-lounge"
+        },
+        {
+          "name": "Dinner",
+          "id": 154,
+          "slug": "dinner"
+        },
+        {
+          "name": "Food Truck",
+          "id": 157,
+          "slug": "food-truck"
+        },
+        {
+          "name": "Indoor Seating",
+          "id": 160,
+          "slug": "indoor-seating"
+        },
+        {
+          "name": "Late Night",
+          "id": 155,
+          "slug": "late-night"
+        },
+        {
+          "name": "Lunch",
+          "id": 153,
+          "slug": "lunch"
+        },
+        {
+          "name": "Outdoor Seating",
+          "id": 161,
+          "slug": "outdoor-seating"
+        },
+        {
+          "name": "Private Dining",
+          "id": 162,
+          "slug": "private-dining"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "business_hours",
+          "label": "Business Hours",
+          "field_type": "business_hours",
+          "is_required": false,
+          "show_in": [
+            "[owntab]",
+            "[detail]"
+          ],
+          "field_icon": "fas fa-clock",
+          "sort_order": 37
+        },
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 8
+        },
+        {
+          "_group": "Social Media",
+          "htmlvar_name": "facebook",
+          "label": "Facebook",
+          "field_type": "url",
+          "description": "Facebook page URL",
+          "placeholder": "https://facebook.com/yourpage",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fas fa-external-link-alt",
+          "sort_order": 14
+        },
+        {
+          "htmlvar_name": "twitter",
+          "label": "Twitter/X",
+          "field_type": "url",
+          "description": "Twitter/X profile URL",
+          "placeholder": "https://twitter.com/yourhandle",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fab fa-twitter",
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "description": "LinkedIn profile/company URL",
+          "placeholder": "https://linkedin.com/company/yourcompany",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "description": "Pinterest profile URL",
+          "placeholder": "https://pinterest.com/yourprofile",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 20
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "description": "TripAdvisor listing URL",
+          "placeholder": "https://tripadvisor.com/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22
+        },
+        {
+          "htmlvar_name": "yelp",
+          "label": "Yelp",
+          "field_type": "url",
+          "description": "Yelp listing URL",
+          "placeholder": "https://yelp.com/biz/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 16,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 23,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "featured",
+          "label": "Featured",
+          "field_type": "checkbox",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 31
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 11
+        },
+        {
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 25,
+          "_rename_from": [
+            "extended_description_",
+            "enter_extended_description"
+          ]
+        },
+        {
+          "htmlvar_name": "_downloadable_media",
+          "label": "Downloadable Media",
+          "field_type": "file",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 30
+        }
+      ],
+      "staging_slug": "eat"
+    },
+    {
+      "cpt": "Getting Around",
+      "post_type": "gd_gettingaround",
+      "slug": "getting-around",
+      "categories": [
+        {
+          "name": "Car Rentals",
+          "staging_id": 2114,
+          "id": 115,
+          "staging_slug": "car-rentals",
+          "slug": "car-rentals",
+          "aliases": [
+            "Car Rentals"
+          ]
+        },
+        {
+          "name": "Airlines + Ferry",
+          "staging_id": 2115,
+          "id": 128,
+          "staging_slug": "airlines-ferry",
+          "slug": "airlines-ferry",
+          "aliases": [
+            "Island Hopping"
+          ]
+        },
+        {
+          "name": "Taxis + Rideshare",
+          "staging_id": 2116,
+          "id": 129,
+          "staging_slug": "taxis-rideshare",
+          "slug": "taxis-rideshare",
+          "aliases": [
+            "Taxis and Rideshares"
+          ]
+        },
+        {
+          "name": "Uncategorized",
+          "staging_id": 499,
+          "id": 499,
+          "staging_slug": "uncategorized",
+          "slug": "uncategorized",
+          "aliases": [
+            "Boaters and Cruisers",
+            "Taxis and Rideshares",
+            "Pet Travel",
+            "Wheelchair Access"
+          ]
+        },
+        {
+          "name": "Arriving by Cruise",
+          "id": 130,
+          "slug": "arriving-by-cruise",
+          "aliases": [
+              "Cruise Ship Passengers"
+          ],
+          "_source": "dev_export"
+        }
+      ],
+      "tags": [
+        {
+          "name": "Anchorage and Moorings",
+          "id": 174,
+          "slug": "anchorage-moorings"
+        },
+        {
+          "name": "Island Hopping",
+          "id": 170,
+          "slug": "island-hopping"
+        },
+        {
+          "name": "Marina",
+          "id": 175,
+          "slug": "marina"
+        },
+        {
+          "name": "Puerto Rico",
+          "id": 171,
+          "slug": "puerto-rico"
+        },
+        {
+          "name": "St. John",
+          "id": 173,
+          "slug": "st-john"
+        },
+        {
+          "name": "St. Thomas",
+          "id": 172,
+          "slug": "st-thomas"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 8
+        },
+        {
+          "_group": "Social Media",
+          "htmlvar_name": "facebook",
+          "label": "Facebook",
+          "field_type": "url",
+          "description": "Facebook page URL",
+          "placeholder": "https://facebook.com/yourpage",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fas fa-external-link-alt",
+          "sort_order": 14
+        },
+        {
+          "htmlvar_name": "twitter",
+          "label": "Twitter/X",
+          "field_type": "url",
+          "description": "Twitter/X profile URL",
+          "placeholder": "https://twitter.com/yourhandle",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "field_icon": "fab fa-twitter",
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "description": "LinkedIn profile/company URL",
+          "placeholder": "https://linkedin.com/company/yourcompany",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "description": "Pinterest profile URL",
+          "placeholder": "https://pinterest.com/yourprofile",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 20
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "description": "TripAdvisor listing URL",
+          "placeholder": "https://tripadvisor.com/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22
+        },
+        {
+          "htmlvar_name": "yelp",
+          "label": "Yelp",
+          "field_type": "url",
+          "description": "Yelp listing URL",
+          "placeholder": "https://yelp.com/biz/...",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 16,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 23,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "featured",
+          "label": "Featured",
+          "field_type": "checkbox",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 31
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 11
+        },
+        {
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 25,
+          "_rename_from": [
+            "extended_description_",
+            "enter_extended_description"
+          ]
+        },
+        {
+          "htmlvar_name": "_downloadable_media",
+          "label": "Downloadable Media",
+          "field_type": "file",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 30
+        }
+      ],
+      "staging_slug": "transportation"
+    },
+    {
+      "cpt": "Events",
+      "post_type": "gd_event",
+      "slug": "events",
+      "categories": [
+        {
+          "name": "All Events",
+          "staging_id": 116,
+          "id": 116,
+          "staging_slug": "all-events",
+          "slug": "all-events",
+          "aliases": []
+        },
+        {
+          "name": "Happening Now",
+          "staging_id": 111,
+          "id": 111,
+          "staging_slug": "happening-now",
+          "slug": "happening-now",
+          "aliases": []
+        },
+        {
+          "name": "Signature Events",
+          "staging_id": 108,
+          "id": 108,
+          "staging_slug": "signature-events",
+          "slug": "signature-events",
+          "aliases": [
+            "Events"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "January",
+          "slug": "01-jan"
+        },
+        {
+          "name": "February",
+          "slug": "02-feb"
+        },
+        {
+          "name": "March",
+          "slug": "03-mar"
+        },
+        {
+          "name": "April",
+          "slug": "04-apr"
+        },
+        {
+          "name": "May",
+          "slug": "05-may"
+        },
+        {
+          "name": "June",
+          "slug": "06-jun"
+        },
+        {
+          "name": "July",
+          "slug": "07-jul"
+        },
+        {
+          "name": "August",
+          "slug": "08-aug"
+        },
+        {
+          "name": "September",
+          "slug": "09-sep"
+        },
+        {
+          "name": "October",
+          "slug": "10-oct"
+        },
+        {
+          "name": "November",
+          "slug": "11-nov"
+        },
+        {
+          "name": "December",
+          "slug": "12-dec"
+        },
+        {
+          "name": "Adventure",
+          "slug": "adventure"
+        },
+        {
+          "name": "Annual Event",
+          "slug": "annual"
+        },
+        {
+          "name": "Arts and Culture",
+          "slug": "arts-and-culture"
+        },
+        {
+          "name": "Christmas",
+          "slug": "christmaas"
+        },
+        {
+          "name": "Cruise Friendly",
+          "slug": "cruise-friendly"
+        },
+        {
+          "name": "Cultural Tradition",
+          "slug": "cultural-tradition"
+        },
+        {
+          "name": "Entertainment",
+          "slug": "entertainment"
+        },
+        {
+          "name": "Every Month",
+          "slug": "monthly"
+        },
+        {
+          "name": "Every Week",
+          "slug": "weekly"
+        },
+        {
+          "name": "Family Friendly",
+          "slug": "family-friendly"
+        },
+        {
+          "name": "Food and Drink",
+          "slug": "food-and-drink"
+        },
+        {
+          "name": "Fundraiser",
+          "slug": "fundraiser"
+        },
+        {
+          "name": "Independence Day",
+          "slug": "independence-day"
+        },
+        {
+          "name": "Local Holiday",
+          "slug": "local-holiday"
+        },
+        {
+          "name": "New Year's",
+          "slug": "new-years"
+        },
+        {
+          "name": "Relaxation",
+          "slug": "relaxation"
+        },
+        {
+          "name": "Romance",
+          "slug": "romance"
+        },
+        {
+          "name": "Seasonal Event",
+          "slug": "seasonal"
+        },
+        {
+          "name": "Signature Event",
+          "slug": "signature-event"
+        },
+        {
+          "name": "Sports and Fitness",
+          "slug": "sports-and-fitness"
+        },
+        {
+          "name": "Thanksgiving",
+          "slug": "thanksgiving"
+        },
+        {
+          "name": "U.S. Holiday",
+          "slug": "us-holiday"
+        },
+        {
+          "name": "Weddings and Events",
+          "slug": "weddings-events"
+        },
+        {
+          "name": "Workshop or Class",
+          "slug": "workshop-class"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "recurring",
+          "label": "Recurring Event?",
+          "field_type": "event",
+          "options": "Yes/1,No/0",
+          "is_required": true,
+          "show_in": [],
+          "field_icon": "fas fa-redo",
+          "sort_order": 1
+        },
+        {
+          "htmlvar_name": "event_dates",
+          "label": "Event Dates",
+          "field_type": "event",
+          "is_required": true,
+          "show_in": [
+            "[detail]",
+            "[listing]",
+            "[mapbubble]"
+          ],
+          "field_icon": "fas fa-calendar-alt",
+          "sort_order": 2
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 7
+        },
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 8,
+          "_rename_from": ["enter_book_online_url"]
+        },
+        {
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 11,
+          "_rename_from": [
+            "extended_description_",
+            "enter_extended_description"
+          ]
+        },
+        {
+          "htmlvar_name": "video",
+          "label": "Video",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [
+            "[owntab]"
+          ],
+          "sort_order": 12
+        },
+        {
+          "htmlvar_name": "gd_place",
+          "label": "Link Posts: Places to Stay",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 16
+        },
+        {
+          "htmlvar_name": "gd_thingstodo",
+          "label": "Link Posts: Things to Do",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "gd_foodanddrink",
+          "label": "Link Posts: Food and Drink",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 18
+        },
+        {
+          "htmlvar_name": "gd_guides",
+          "label": "Link Posts: Guides",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 19
+        },
+        {
+          "htmlvar_name": "gd_specialoffers",
+          "label": "Link Posts: Special Offers",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 20
+        }
+      ],
+      "_source": "staging_export_0223"
+    },
+    {
+      "cpt": "Guides",
+      "post_type": "gd_guides",
+      "slug": "guides",
+      "categories": [
+        {
+          "name": "Attractions",
+          "staging_id": 228,
+          "id": 228,
+          "staging_slug": "attractions",
+          "slug": "attractions",
+          "aliases": []
+        },
+        {
+          "name": "Feature",
+          "staging_id": 239,
+          "id": 239,
+          "staging_slug": "feature",
+          "slug": "feature",
+          "aliases": []
+        },
+        {
+          "name": "Festival",
+          "staging_id": 236,
+          "id": 236,
+          "staging_slug": "festival",
+          "slug": "festival",
+          "aliases": []
+        },
+        {
+          "name": "Food Nightlife",
+          "staging_id": 234,
+          "id": 234,
+          "staging_slug": "food-nightlife",
+          "slug": "food-nightlife",
+          "aliases": []
+        },
+        {
+          "name": "Hotels",
+          "staging_id": 230,
+          "id": 230,
+          "staging_slug": "hotels",
+          "slug": "hotels",
+          "aliases": []
+        },
+        {
+          "name": "Restaurants",
+          "staging_id": 232,
+          "id": 232,
+          "staging_slug": "restaurants",
+          "slug": "restaurants",
+          "aliases": []
+        },
+        {
+          "name": "Uncategorized",
+          "staging_id": 135,
+          "id": 135,
+          "staging_slug": "uncategorized",
+          "slug": "uncategorized",
+          "aliases": []
+        },
+        {
+          "name": "Videos",
+          "staging_id": 238,
+          "id": 238,
+          "staging_slug": "videos",
+          "slug": "videos",
+          "aliases": []
+        }
+      ],
+      "tags": [],
+      "fields": [
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 8
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 15,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "special_offers",
+          "label": "Special Offers",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [
+            "[owntab]"
+          ],
+          "sort_order": 44
+        },
+        {
+          "htmlvar_name": "business_hours",
+          "label": "Business Hours",
+          "field_type": "business_hours",
+          "is_required": false,
+          "show_in": [
+            "[owntab]",
+            "[detail]"
+          ],
+          "field_icon": "fas fa-clock",
+          "sort_order": 45
+        }
+      ],
+      "_source": "dev_export"
+    },
+    {
+      "cpt": "Island Living",
+      "post_type": "gd_islandliving",
+      "slug": "island-living",
+      "categories": [
+        {
+          "name": "Community Organizations",
+          "staging_id": 127,
+          "id": 127,
+          "staging_slug": "community-organizations",
+          "slug": "community-organizations",
+          "aliases": []
+        },
+        {
+          "name": "Medical Care",
+          "staging_id": 126,
+          "id": 126,
+          "staging_slug": "medical-care",
+          "slug": "medical-care",
+          "aliases": [
+              "Doctors",
+              "Emergency Care"
+
+          ]
+        },
+        {
+          "name": "Real Estate",
+          "staging_id": 114,
+          "id": 114,
+          "staging_slug": "real-estate",
+          "slug": "real-estate",
+          "aliases": [
+              "Agents and Brokers",
+              "Long Term Rentals",
+              "Mortgage Lenders"
+          ]
+        },
+        {
+          "name": "Relocation",
+          "staging_id": 125,
+          "id": 125,
+          "staging_slug": "relocation",
+          "slug": "relocation",
+          "aliases": [
+              "Banking",
+              "Education",
+              "Insurance Agents",
+              "Movers and Shippers",
+              "Professional Services"
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "Banks and Lenders",
+          "id": 164,
+          "slug": "banks-lenders"
+        },
+        {
+          "name": "Education",
+          "id": 165,
+          "slug": "education"
+        },
+        {
+          "name": "Freight and Shipping",
+          "id": 168,
+          "slug": "freight-shipping"
+        },
+        {
+          "name": "Insurance",
+          "id": 166,
+          "slug": "insurance"
+        },
+        {
+          "name": "Long Term Rentals",
+          "id": 169,
+          "slug": "long-term-rentals"
+        },
+        {
+          "name": "Pet Care",
+          "id": 167,
+          "slug": "pet-care"
+        }
+      ],
+      "fields": [
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 8
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 15,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "special_offers",
+          "label": "Special Offers",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [
+            "[owntab]"
+          ],
+          "sort_order": 44
+        },
+        {
+          "htmlvar_name": "business_hours",
+          "label": "Business Hours",
+          "field_type": "business_hours",
+          "is_required": false,
+          "show_in": [
+            "[owntab]",
+            "[detail]"
+          ],
+          "field_icon": "fas fa-clock",
+          "sort_order": 45
+        }
+      ],
+      "_source": "dev_export"
+    },
+    {
+      "cpt": "Special Offers",
+      "post_type": "gd_specialoffers",
+      "slug": "special-offers",
+      "categories": [
+        {
+          "name": "Food and Drink",
+          "staging_id": 347,
+          "id": 347,
+          "staging_slug": "o-food-drink",
+          "slug": "o-food-drink",
+          "aliases": []
+        },
+        {
+          "name": "Getting Around",
+          "staging_id": 348,
+          "id": 348,
+          "staging_slug": "o-getting-around",
+          "slug": "o-getting-around",
+          "aliases": []
+        },
+        {
+          "name": "Island Life",
+          "staging_id": 349,
+          "id": 349,
+          "staging_slug": "o-island-life",
+          "slug": "o-island-life",
+          "aliases": []
+        },
+        {
+          "name": "Places to Stay",
+          "staging_id": 345,
+          "id": 345,
+          "staging_slug": "o-stay",
+          "slug": "o-stay",
+          "aliases": []
+        },
+        {
+          "name": "Things to Do",
+          "staging_id": 346,
+          "id": 346,
+          "staging_slug": "o-to-do",
+          "slug": "o-to-do",
+          "aliases": []
+        }
+      ],
+      "tags": [],
+      "fields": [
+        {
+          "htmlvar_name": "book_online_url",
+          "label": "Book Online URL",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 8
+        },
+        {
+          "htmlvar_name": "google_business",
+          "label": "Google Business",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 15,
+          "_rename_from": [
+            "_google_biz",
+            "google_business_",
+            "_google_business"
+          ]
+        },
+        {
+          "htmlvar_name": "youtube",
+          "label": "YouTube Channel",
+          "field_type": "url",
+          "description": "YouTube channel URL",
+          "placeholder": "https://youtube.com/yourchannel",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 17,
+          "_rename_from": [
+            "youtube_channel_or_video",
+            "youtube_channel_or_video_"
+          ]
+        },
+        {
+          "htmlvar_name": "linkedin",
+          "label": "LinkedIn",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 18,
+          "_rename_from": [
+            "linked_",
+            "_linked_in"
+          ]
+        },
+        {
+          "htmlvar_name": "pinterest",
+          "label": "Pinterest",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 19
+        },
+        {
+          "htmlvar_name": "trip_advisor",
+          "label": "TripAdvisor",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 21
+        },
+        {
+          "htmlvar_name": "wedding_wire",
+          "label": "Wedding Wire",
+          "field_type": "url",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 22,
+          "_rename_from": [
+            "wedding_wire_",
+            "_wedding_wire"
+          ]
+        },
+        {
+          "htmlvar_name": "details",
+          "label": "Details",
+          "field_type": "multiselect",
+          "options": "360 Tour\r\nAccessible / ADA\r\nBook Online\r\nHistoric Site\r\nLGBTQ+\r\nOnsite Parking\r\nParks & Attractions\r\nPet Friendly\r\nScenic Views\r\nSt. Croix 100\r\nTours\r\nVolunteer",
+          "is_required": false,
+          "show_in": [],
+          "sort_order": 30,
+          "_rename_from": [
+            "details_"
+          ]
+        },
+        {
+          "htmlvar_name": "special_offers",
+          "label": "Special Offers",
+          "field_type": "textarea",
+          "is_required": false,
+          "show_in": [
+            "[owntab]"
+          ],
+          "sort_order": 44
+        },
+        {
+          "htmlvar_name": "business_hours",
+          "label": "Business Hours",
+          "field_type": "business_hours",
+          "is_required": false,
+          "show_in": [
+            "[owntab]",
+            "[detail]"
+          ],
+          "field_icon": "fas fa-clock",
+          "sort_order": 45
+        }
+      ],
+      "_source": "dev_export"
+    }
+  ],
+  "global_tags": [
+    {
+      "name": "East End",
+      "id": 2092,
+      "slug": "east-end"
+    },
+    {
+      "name": "Christiansted",
+      "id": 2129,
+      "slug": "christiansted"
+    },
+    {
+      "name": "Frederiksted",
+      "id": 2130,
+      "slug": "frederiksted"
+    },
+    {
+      "name": "West End",
+      "id": 2131,
+      "slug": "west-end"
+    },
+    {
+      "name": "North Shore",
+      "id": 2132,
+      "slug": "north-shore"
+    },
+    {
+      "name": "Mid Island",
+      "id": 2133,
+      "slug": "mid-island"
+    },
+    {
+      "name": "Beachfront",
+      "id": 2134,
+      "slug": "beachfront"
+    },
+    {
+      "name": "Pool",
+      "id": 2135,
+      "slug": "pool"
+    },
+    {
+      "name": "Restaurant",
+      "id": 2136,
+      "slug": "restaurant"
+    },
+    {
+      "name": "Fitness Center",
+      "id": 2137,
+      "slug": "fitness-center"
+    },
+    {
+      "name": "Kitchenette",
+      "id": 2138,
+      "slug": "kitchenette"
+    },
+    {
+      "name": "Adult Only",
+      "id": 2139,
+      "slug": "adult-only"
+    },
+    {
+      "name": "Family Friendly",
+      "id": 2140,
+      "slug": "family-friendly"
+    },
+    {
+      "name": "Pet Friendly",
+      "id": 2141,
+      "slug": "pet-friendly"
+    },
+    {
+      "name": "LGBTQ+",
+      "id": 2142,
+      "slug": "lgbtq"
+    },
+    {
+      "name": "Local Ownership",
+      "id": 2143,
+      "slug": "local-ownership"
+    },
+    {
+      "name": "Meeting Space",
+      "id": 2144,
+      "slug": "meeting-space"
+    },
+    {
+      "name": "Wedding / Event Venue",
+      "id": 2145,
+      "slug": "wedding-event-venue"
+    },
+    {
+      "name": "Concierge",
+      "id": 2146,
+      "slug": "concierge"
+    },
+    {
+      "name": "Historic",
+      "id": 2147,
+      "slug": "historic"
+    },
+    {
+      "name": "Off-Street Parking",
+      "id": 2148,
+      "slug": "off-street-parking"
+    },
+    {
+      "name": "Accessible / ADA",
+      "id": 2149,
+      "slug": "accessible-ada"
+    },
+    {
+      "name": "Day Pass",
+      "id": 2150,
+      "slug": "day-pass"
+    },
+    {
+      "name": "# of Rooms",
+      "id": 2151,
+      "slug": "of-rooms"
+    },
+    {
+      "name": "1-2 BR",
+      "id": 2152,
+      "slug": "1-2-br"
+    },
+    {
+      "name": "3-4 BR",
+      "id": 2153,
+      "slug": "3-4-br"
+    },
+    {
+      "name": "5+ BR",
+      "id": 2154,
+      "slug": "5-br"
+    },
+    {
+      "name": "Extended Stay Option",
+      "id": 2155,
+      "slug": "extended-stay-option"
+    },
+    {
+      "name": "Guided Tour",
+      "id": 2156,
+      "slug": "guided-tour"
+    },
+    {
+      "name": "Casino",
+      "id": 2157,
+      "slug": "casino"
+    },
+    {
+      "id": 2158,
+      "slug": "horseback-riding"
+    },
+    {
+      "name": "Museums",
+      "id": 2159,
+      "slug": "museums"
+    },
+    {
+      "name": "History",
+      "id": 2160,
+      "slug": "history"
+    },
+    {
+      "name": "Adventure",
+      "id": 2161,
+      "slug": "adventure"
+    },
+    {
+      "name": "Culinary / Tasting",
+      "id": 2162,
+      "slug": "culinary-tasting"
+    },
+    {
+      "name": "Self Guided Tours",
+      "id": 2163,
+      "slug": "self-guided-tours"
+    },
+    {
+      "name": "Cruise Passengers",
+      "id": 2164,
+      "slug": "cruise-passengers"
+    },
+    {
+      "name": "Parking",
+      "id": 2165,
+      "slug": "parking"
+    },
+    {
+      "name": "Bathrooms",
+      "id": 2166,
+      "slug": "bathrooms"
+    },
+    {
+      "name": "Scenic View",
+      "id": 2167,
+      "slug": "scenic-view"
+    },
+    {
+      "name": "Breakfast",
+      "id": 2168,
+      "slug": "breakfast"
+    },
+    {
+      "name": "Brunch",
+      "id": 2169,
+      "slug": "brunch"
+    },
+    {
+      "name": "Lunch",
+      "id": 2170,
+      "slug": "lunch"
+    },
+    {
+      "name": "Dinner",
+      "id": 2171,
+      "slug": "dinner"
+    },
+    {
+      "name": "Cocktail Lounge",
+      "id": 2172,
+      "slug": "cocktail-lounge"
+    },
+    {
+      "name": "Vegan / Veg",
+      "id": 2173,
+      "slug": "vegan-veg"
+    },
+    {
+      "name": "Kid's Menu",
+      "id": 2174,
+      "slug": "kids-menu"
+    },
+    {
+      "name": "Business for Sale",
+      "id": 2175,
+      "slug": "business-for-sale"
+    },
+    {
+      "name": "Short Term",
+      "id": 2176,
+      "slug": "short-term"
+    },
+    {
+      "name": "Long Term",
+      "id": 2177,
+      "slug": "long-term"
+    },
+    {
+      "name": "Scuba",
+      "id": 2178,
+      "slug": "scuba"
+    },
+    {
+      "name": "Buck Island",
+      "id": 2179,
+      "slug": "buck-island"
+    },
+    {
+      "name": "Kayaking",
+      "id": 2180,
+      "slug": "kayaking"
+    },
+    {
+      "name": "Attractions",
+      "id": 2181,
+      "slug": "attractions"
+    }
+  ],
+  "dev_global_tags": [
+    {
+      "name": "Accommodations",
+      "id": 325,
+      "slug": "accommodations"
+    },
+    {
+      "name": "Adult Only",
+      "id": 141,
+      "slug": "adult-only"
+    },
+    {
+      "name": "Beach Front",
+      "id": 142,
+      "slug": "beach-front"
+    },
+    {
+      "name": "Business",
+      "id": 313,
+      "slug": "business"
+    },
+    {
+      "name": "Colony Cove Condo",
+      "id": 324,
+      "slug": "colony-cove-condo"
+    },
+    {
+      "name": "Concierge",
+      "id": 143,
+      "slug": "concierge"
+    },
+    {
+      "name": "Cottages By The Sea",
+      "id": 326,
+      "slug": "cottages-by-the-sea"
+    },
+    {
+      "name": "Day Pass",
+      "id": 144,
+      "slug": "day-pass"
+    },
+    {
+      "name": "East End",
+      "id": 331,
+      "slug": "east-end"
+    },
+    {
+      "name": "Eco-Friendly Lodging",
+      "id": 320,
+      "slug": "eco-friendly-lodging"
+    },
+    {
+      "name": "Fitness Center",
+      "id": 145,
+      "slug": "fitness-center"
+    },
+    {
+      "name": "Frederiksted",
+      "id": 327,
+      "slug": "frederiksted"
+    },
+    {
+      "name": "Gallows Bay",
+      "id": 330,
+      "slug": "gallows-bay"
+    },
+    {
+      "name": "Island Wide",
+      "id": 314,
+      "slug": "island-wide"
+    },
+    {
+      "name": "Kitchenette",
+      "id": 146,
+      "slug": "kitchenette"
+    },
+    {
+      "name": "LGBTQ",
+      "id": 328,
+      "slug": "lgbtq"
+    },
+    {
+      "name": "Map",
+      "id": 316,
+      "slug": "map"
+    },
+    {
+      "name": "Meeting Space",
+      "id": 147,
+      "slug": "meeting-space"
+    },
+    {
+      "name": "North Shore",
+      "id": 315,
+      "slug": "north-shore"
+    },
+    {
+      "name": "Pool",
+      "id": 148,
+      "slug": "pool"
+    },
+    {
+      "name": "Restaurant On Site",
+      "id": 149,
+      "slug": "restaurant-onsite"
+    },
+    {
+      "name": "Stay",
+      "id": 317,
+      "slug": "stay"
+    },
+    {
+      "name": "Sustainable Tourism",
+      "id": 322,
+      "slug": "sustainable-tourism"
+    },
+    {
+      "name": "Take Over",
+      "id": 150,
+      "slug": "take-over"
+    },
+    {
+      "name": "Vacation Villas",
+      "id": 319,
+      "slug": "vacation-villas"
+    },
+    {
+      "name": "West End",
+      "id": 323,
+      "slug": "west-end"
+    }
+  ]
+}

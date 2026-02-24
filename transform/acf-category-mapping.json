@@ -1,0 +1,432 @@
+{
+  "Hotels": {
+    "id": 2094,
+    "name": "Resorts + Hotels",
+    "parent_id": 2093
+  },
+  "Hotels and Inns": {
+    "id": 2094,
+    "name": "Resorts + Hotels",
+    "parent_id": 2093
+  },
+  "Resorts": {
+    "id": 2094,
+    "name": "Resorts + Hotels",
+    "parent_id": 2093
+  },
+  "Small Inns": {
+    "id": 2094,
+    "name": "Resorts + Hotels",
+    "parent_id": 2093
+  },
+  "Vacation Rentals and Villas": {
+    "id": 2095,
+    "name": "Vacation Rentals",
+    "parent_id": 2093
+  },
+  "1-2 Bedroom Rentals": {
+    "id": 2095,
+    "name": "Vacation Rentals",
+    "parent_id": 2093
+  },
+  "3-4 Bedroom Rentals": {
+    "id": 2095,
+    "name": "Vacation Rentals",
+    "parent_id": 2093
+  },
+  "5+ Bedroom Rentals": {
+    "id": 2095,
+    "name": "Vacation Rentals",
+    "parent_id": 2093
+  },
+  "Cottages": {
+    "id": 2095,
+    "name": "Vacation Rentals",
+    "parent_id": 2093
+  },
+  "Campgrounds": {
+    "id": 2096,
+    "name": "Campgrounds + Eco",
+    "parent_id": 2093
+  },
+  "Retreats": {
+    "id": 2096,
+    "name": "Campgrounds + Eco",
+    "parent_id": 2093
+  },
+  "Adventure Tours": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Guided Tours": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Hiking and Biking": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Hiking Trails": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Horseback Riding": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Golf and Tennis": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Tennis": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Family Activities": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Casino": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Nightlife and Entertainment": {
+    "id": 2098,
+    "name": "Land Activities",
+    "parent_id": 2097
+  },
+  "Scuba Diving": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "Kayaking": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "Water Sports": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "Sailing and Boat Charters": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "Sport Fishing": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "Island Hopping": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "St. Croix Dive Sites": {
+    "id": 2099,
+    "name": "Water Activities",
+    "parent_id": 2097
+  },
+  "St. Croix Beaches": {
+    "id": 2100,
+    "name": "Beaches",
+    "parent_id": 2097
+  },
+  "Buck Island": {
+    "id": 2100,
+    "name": "Beaches",
+    "parent_id": 2097
+  },
+  "National Parks": {
+    "id": 2100,
+    "name": "Beaches",
+    "parent_id": 2097
+  },
+  "Massage and Spa": {
+    "id": 2101,
+    "name": "Spa + Wellness",
+    "parent_id": 2097
+  },
+  "Yoga and Fitness": {
+    "id": 2101,
+    "name": "Spa + Wellness",
+    "parent_id": 2097
+  },
+  "Beauty": {
+    "id": 2101,
+    "name": "Spa + Wellness",
+    "parent_id": 2097
+  },
+  "Art and Galleries": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Arts and Culture": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Art Thursday": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Historic Sites": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Historic Properties": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Parks and Historic Attractions": {
+    "id": 2102,
+    "name": "Arts + Culture",
+    "parent_id": 2097
+  },
+  "Christiansted Restaurants": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "East End Restaurants": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Frederiksted Restaurants": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Mid Island Restaurants": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "North Shore Restaurants": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Food Trucks": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Craft Cocktails + Lounges": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Distilleries and Breweries": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Tasting Tours": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Food and Drink Experiences": {
+    "id": 2104,
+    "name": "Restaurants",
+    "parent_id": 2103
+  },
+  "Coffee + Sweets": {
+    "id": 2105,
+    "name": "Coffee Shops + Sweets",
+    "parent_id": 2103
+  },
+  "Farm Stands": {
+    "id": 2106,
+    "name": "Markets + Farm Stands",
+    "parent_id": 2103
+  },
+  "Food Shopping": {
+    "id": 2106,
+    "name": "Markets + Farm Stands",
+    "parent_id": 2103
+  },
+  "Catering, Chefs, Desserts": {
+    "id": 2107,
+    "name": "Catering + Chefs",
+    "parent_id": 2103
+  },
+  "Agents and Brokers": {
+    "id": 2109,
+    "name": "Real Estate",
+    "parent_id": 2108
+  },
+  "Rental Agents": {
+    "id": 2109,
+    "name": "Real Estate",
+    "parent_id": 2108
+  },
+  "Mortgage Lenders": {
+    "id": 2109,
+    "name": "Real Estate",
+    "parent_id": 2108
+  },
+  "Long Term Rentals": {
+    "id": 2109,
+    "name": "Real Estate",
+    "parent_id": 2108
+  },
+  "Movers and Shippers": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Education": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Cell Phones and Wifi": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Cellphones and Communications": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Home Maintenance Services": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Pet Travel": {
+    "id": 2110,
+    "name": "Relocation",
+    "parent_id": 2108
+  },
+  "Doctors": {
+    "id": 2111,
+    "name": "Medical",
+    "parent_id": 2108
+  },
+  "Emergency Care": {
+    "id": 2111,
+    "name": "Medical",
+    "parent_id": 2108
+  },
+  "Pharmacies": {
+    "id": 2111,
+    "name": "Medical",
+    "parent_id": 2108
+  },
+  "Community Organizations": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Banking": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Insurance Agents": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Professional Services": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Architects and Designers": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Pet Care": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Boaters and Cruisers": {
+    "id": 2112,
+    "name": "Community",
+    "parent_id": 2108
+  },
+  "Car Rentals": {
+    "id": 2114,
+    "name": "Car Rentals",
+    "parent_id": 2113
+  },
+  "Taxis and Rideshares": {
+    "id": 2116,
+    "name": "Taxis + Rideshare",
+    "parent_id": 2113
+  },
+  "Island Jewelry": {
+    "id": 2118,
+    "name": "Island Jewelry",
+    "parent_id": 2117
+  },
+  "Lifestyle and Gifts": {
+    "id": 2119,
+    "name": "Lifestyle + Gifts",
+    "parent_id": 2117
+  },
+  "St. Croix Posters": {
+    "id": 2119,
+    "name": "Lifestyle + Gifts",
+    "parent_id": 2117
+  },
+  "Boutiques and Stores": {
+    "id": 2121,
+    "name": "Boutiques",
+    "parent_id": 2117
+  },
+  "Blog": {
+    "id": 2123,
+    "name": "Guides / Blog",
+    "parent_id": 2122
+  },
+  "Cruise Ship Passengers": {
+    "id": 2124,
+    "name": "Travel Tips + FAQ",
+    "parent_id": 2122
+  },
+  "Climate and Weather": {
+    "id": 2124,
+    "name": "Travel Tips + FAQ",
+    "parent_id": 2122
+  },
+  "Wheelchair Access": {
+    "id": 2124,
+    "name": "Travel Tips + FAQ",
+    "parent_id": 2122
+  },
+  "Events": {
+    "id": 2127,
+    "name": "Calendar",
+    "parent_id": 2122
+  },
+  "Events by Month": {
+    "id": 2127,
+    "name": "Calendar",
+    "parent_id": 2122
+  }
+}
