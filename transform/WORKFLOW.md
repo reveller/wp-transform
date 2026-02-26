@@ -18,11 +18,65 @@ Every script supports `DRY_RUN=1` (PHP) or `--dry-run` (Python).
 
 ## Table of Contents
 
-1. [GeoDirectory Listings Workflow](#geodirectory-listings-workflow)
-2. [Blog Posts Workflow](#blog-posts-workflow)
-3. [Script Reference](#script-reference)
-4. [Content Cleaning Reference](#content-cleaning-reference)
-5. [Key Files & Locations](#key-files--locations)
+1. [What's Been Accomplished](#whats-been-accomplished)
+2. [GeoDirectory Listings Workflow](#geodirectory-listings-workflow)
+3. [Blog Posts Workflow](#blog-posts-workflow)
+4. [Script Reference](#script-reference)
+5. [Content Cleaning Reference](#content-cleaning-reference)
+6. [Key Files & Locations](#key-files--locations)
+
+---
+
+## What's Been Accomplished
+
+As of February 27, 2026, the following data migration work is complete:
+
+### GeoDirectory Business Listings
+- All business listing CPTs imported, audited, and verified:
+  Places to Stay, Food and Drink, Getting Around, Island Living, Things to Do
+- Signature Events extracted, transformed, and imported into the Events CPT
+- Beaches, Hiking Trails, and Dive Sites extracted, transformed, and imported
+  into the Guides CPT
+- Special Offers CPT structure defined (Wendy will enter content manually)
+
+### Image Pipeline
+- Image deduplication across all GD CPTs — removed revision copies,
+  consolidated to originals
+- GD attachment metadata repaired so galleries and thumbnails resolve correctly
+- Featured image references repaired across three systems: geodir_attachments
+  `featured=1` flag, GD detail table `featured_image` column, and
+  wp_postmeta `_thumbnail_id`
+
+### Blog Posts & Pages
+- 215 blog posts transformed, imported, and featured images attached
+- 47 pages imported (filtered by curated slug list) with featured images
+  and content images fixed
+- 7 additional miscellaneous posts imported with featured images
+- Beaver Builder tags, empty shortcode blocks, `[associated-posts]`,
+  `[display-posts]`, and "Read More" / "Do More" / "Learn More"
+  explore-meta blocks stripped from all content
+- Author fields remapped from staging-site users to dev-site users
+  (wendy → gotodev, Nomadic → gotodev, fareharbor → gotodev)
+
+### Content & Media
+- All image URLs converted to domain-independent relative paths
+  (`/wp-content/uploads/...`) — no changes needed at go-live
+- Page content images downloaded from staging and live sites, rewritten
+  to local relative paths
+- 3,369 media items registered in the WordPress Media Library
+- CSS `background-image` URLs fixed alongside standard `<img>` tags
+
+### Audits & Documentation
+- All GeoDirectory CPTs audited: listings, categories, and images verified
+  against source CSV data
+- Audits can be re-run on-demand using `audit-listings.php`
+- CPT taxonomy documented including CPT definitions (fields, categories,
+  tags) in `gd-taxonomy-cpts.json`
+- Full workflow documentation in this file for team reference
+
+### What Remains
+- **Special Offers:** Wendy will manually enter content
+- **Possible additional Guides subcategories** as content becomes available
 
 ---
 
