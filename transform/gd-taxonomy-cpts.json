@@ -221,11 +221,12 @@
           ]
         },
         {
-          "name": "Hotels",
-          "id": 4,
-          "slug": "hotels",
-          "aliases": [],
-          "_source": "dev_export"
+          "name": "Uncategorized",
+          "id": 523,
+          "slug": "uncategorized",
+          "aliases": [
+            "Historic Properties"
+          ]
         }
       ],
       "tags": [
@@ -531,7 +532,6 @@
             "Golf and Tennis",
             "Guided Tours",
             "Hiking and Biking",
-            "Hiking Trails",
             "Nightlife and Entertainment",
             "Casino",
             "Tasting Tours",
@@ -552,7 +552,6 @@
           "aliases": [
             "Sailing and Boat Charters",
             "Scuba Diving",
-            "St. Croix Dive Sites",
             "Sport Fishing",
             "Buck Island",
             "Kayaking",
@@ -1839,6 +1838,32 @@
           "aliases": []
         },
         {
+          "name": "St. Croix Beaches",
+          "staging_id": 524,
+          "id": 524,
+          "staging_slug": "st-croix-beaches",
+          "slug": "st-croix-beaches",
+          "aliases": []
+        },
+        {
+          "name": "St. Croix Hiking Trails",
+          "staging_id": 525,
+          "id": 525,
+          "staging_slug": "st-croix-hiking-trails",
+          "slug": "st-croix-hiking-trails",
+          "aliases": [
+            "Hiking Trails"
+          ]
+        },
+        {
+          "name": "St. Croix Dive Sites",
+          "staging_id": 541,
+          "id": 541,
+          "staging_slug": "st-croix-dive-sites",
+          "slug": "st-croix-dive-sites",
+          "aliases": []
+        },
+        {
           "name": "Uncategorized",
           "staging_id": 135,
           "id": 135,
@@ -2217,6 +2242,41 @@
       "tags": [],
       "fields": [
         {
+          "htmlvar_name": "ongoing",
+          "label": "Ongoing Promo?",
+          "field_type": "event",
+          "options": "Yes/1,No/0",
+          "is_required": true,
+          "show_in": [],
+          "field_icon": "fas fa-redo",
+          "sort_order": 1
+        },
+        {
+          "htmlvar_name": "promo_dates",
+          "label": "Promotion Dates",
+          "field_type": "event",
+          "is_required": true,
+          "show_in": [
+            "[detail]",
+            "[listing]",
+            "[mapbubble]"
+          ],
+          "field_icon": "fas fa-calendar-alt",
+          "sort_order": 2
+        },
+        {
+          "htmlvar_name": "email",
+          "label": "Email",
+          "field_type": "email",
+          "description": "Contact email address",
+          "placeholder": "info@example.com",
+          "is_required": false,
+          "show_in": [
+            "[detail]"
+          ],
+          "sort_order": 7
+        },
+        {
           "htmlvar_name": "book_online_url",
           "label": "Book Online URL",
           "field_type": "url",
@@ -2224,123 +2284,77 @@
           "show_in": [
             "[detail]"
           ],
-          "sort_order": 8
+          "sort_order": 8,
+          "_rename_from": ["enter_book_online_url"]
         },
         {
-          "htmlvar_name": "google_business",
-          "label": "Google Business",
-          "field_type": "url",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 15,
-          "_rename_from": [
-            "_google_biz",
-            "google_business_",
-            "_google_business"
-          ]
-        },
-        {
-          "htmlvar_name": "youtube",
-          "label": "YouTube Channel",
-          "field_type": "url",
-          "description": "YouTube channel URL",
-          "placeholder": "https://youtube.com/yourchannel",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 17,
-          "_rename_from": [
-            "youtube_channel_or_video",
-            "youtube_channel_or_video_"
-          ]
-        },
-        {
-          "htmlvar_name": "linkedin",
-          "label": "LinkedIn",
-          "field_type": "url",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 18,
-          "_rename_from": [
-            "linked_",
-            "_linked_in"
-          ]
-        },
-        {
-          "htmlvar_name": "pinterest",
-          "label": "Pinterest",
-          "field_type": "url",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 19
-        },
-        {
-          "htmlvar_name": "trip_advisor",
-          "label": "TripAdvisor",
-          "field_type": "url",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 21
-        },
-        {
-          "htmlvar_name": "wedding_wire",
-          "label": "Wedding Wire",
-          "field_type": "url",
-          "is_required": false,
-          "show_in": [
-            "[detail]"
-          ],
-          "sort_order": 22,
-          "_rename_from": [
-            "wedding_wire_",
-            "_wedding_wire"
-          ]
-        },
-        {
-          "htmlvar_name": "details",
-          "label": "Details",
-          "field_type": "multiselect",
-          "options": "360 Tour\r\nAccessible / ADA\r\nBook Online\r\nHistoric Site\r\nLGBTQ+\r\nOnsite Parking\r\nParks & Attractions\r\nPet Friendly\r\nScenic Views\r\nSt. Croix 100\r\nTours\r\nVolunteer",
+          "htmlvar_name": "extended_description",
+          "label": "Extended Description",
+          "field_type": "textarea",
           "is_required": false,
           "show_in": [],
-          "sort_order": 30,
+          "sort_order": 11,
           "_rename_from": [
-            "details_"
+            "extended_description_",
+            "enter_extended_description"
           ]
         },
         {
-          "htmlvar_name": "special_offers",
-          "label": "Special Offers",
+          "htmlvar_name": "video",
+          "label": "Video",
           "field_type": "textarea",
           "is_required": false,
           "show_in": [
             "[owntab]"
           ],
-          "sort_order": 44
+          "sort_order": 12
         },
         {
-          "htmlvar_name": "business_hours",
-          "label": "Business Hours",
-          "field_type": "business_hours",
+          "htmlvar_name": "gd_place",
+          "label": "Link Posts: Places to Stay",
+          "field_type": "link_posts",
           "is_required": false,
-          "show_in": [
-            "[owntab]",
-            "[detail]"
-          ],
-          "field_icon": "fas fa-clock",
-          "sort_order": 45
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 16
+        },
+        {
+          "htmlvar_name": "gd_thingstodo",
+          "label": "Link Posts: Things to Do",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 17
+        },
+        {
+          "htmlvar_name": "gd_foodanddrink",
+          "label": "Link Posts: Food and Drink",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 18
+        },
+        {
+          "htmlvar_name": "gd_guides",
+          "label": "Link Posts: Guides",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 19
+        },
+        {
+          "htmlvar_name": "gd_specialoffers",
+          "label": "Link Posts: Special Offers",
+          "field_type": "link_posts",
+          "is_required": false,
+          "show_in": [],
+          "field_icon": "fas fa-link",
+          "sort_order": 20
         }
-      ],
-      "_source": "dev_export"
+      ]
     }
   ],
   "global_tags": [

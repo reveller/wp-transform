@@ -2033,8 +2033,22 @@ def filter_beaver_builder_tags(content):
     content = re.sub(r'\\u003c!\\u002d\\u002d\s*/?wp:fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
     content = re.sub(r'\\u003c!\\u002d\\u002d\s*fl-builder[^\\]*\\u002d\\u002d\\u003e', '', content)
 
-    # Remove WordPress shortcodes: [wpbb ...], [display-posts ...], [fl_builder ...], etc.
-    content = re.sub(r'\[/?(?:wpbb|display-posts|fl_builder)\b[^\]]*\]', '', content, flags=re.IGNORECASE)
+    # Remove WordPress shortcodes: [wpbb ...], [display-posts ...], [fl_builder ...],
+    # [associated-posts], etc.
+    content = re.sub(r'\[/?(?:wpbb|display-posts|fl_builder|associated-posts)\b[^\]]*\]', '', content, flags=re.IGNORECASE)
+
+    # Remove "Read More" / "Do More" / "Learn More" explore-meta blocks:
+    #   <div class="explore-meta">Read More</div>
+    #   with optional <span ...> wrappers around the text, or empty divs
+    content = re.sub(
+        r'<div\s+class="explore-meta">\s*(?:<span[^>]*>)?\s*(?:(?:Read|Do|Learn)\s+More\b[^<]*)?(?:</span>)?\s*</div>',
+        '', content, flags=re.IGNORECASE)
+
+    # Remove empty WP block wrappers (shortcode, html, etc.) left behind after cleaning
+    # e.g. <!-- wp:shortcode -->\n<p></p>\n<!-- /wp:shortcode -->
+    # e.g. <!-- wp:html -->\n\n<!-- /wp:html -->
+    content = re.sub(
+        r'<!--\s*wp:\w+\s*-->\s*(?:<p>\s*</p>\s*)?<!--\s*/wp:\w+\s*-->', '', content)
 
     # Clean up any excessive whitespace left behind
     content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)

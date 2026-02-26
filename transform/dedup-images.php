@@ -317,12 +317,10 @@ if ($post_title_filter) {
 }
 echo "\n";
 
-// Load WP image functions needed for media registration
-if ($register_media) {
-    require_once(ABSPATH . 'wp-admin/includes/image.php');
-    require_once(ABSPATH . 'wp-admin/includes/file.php');
-    require_once(ABSPATH . 'wp-admin/includes/media.php');
-}
+// Load WP image functions needed for media registration and metadata rebuild
+require_once(ABSPATH . 'wp-admin/includes/image.php');
+require_once(ABSPATH . 'wp-admin/includes/file.php');
+require_once(ABSPATH . 'wp-admin/includes/media.php');
 
 // ============================================================
 // Query posts
@@ -367,6 +365,7 @@ $stats = [
     'media_registered' => 0,
     'media_already_registered' => 0,
     'media_register_failed' => 0,
+    'metadata_rebuilt' => 0,
 ];
 
 // ============================================================
@@ -499,7 +498,9 @@ foreach ($posts as $post) {
             $stats['gd_attachments_updated']++;
             if ($dry_run) {
                 echo "    [WOULD UPDATE] GD #$gd_row_id: " . basename($old_file) . " -> " . basename($new_file) . "\n";
+                echo "    [WOULD REBUILD] metadata for " . basename($new_file) . "\n";
             } else {
+                // Update file path
                 $wpdb->update(
                     $attachments_table,
                     ['file' => $new_file],
@@ -508,6 +509,23 @@ foreach ($posts as $post) {
                     ['%d']
                 );
                 echo "    [UPDATE] GD #$gd_row_id: " . basename($old_file) . " -> " . basename($new_file) . "\n";
+
+                // Rebuild metadata from the winner file on disk
+                $winner_abs = $uploads_basedir . '/' . ltrim($new_file, '/');
+                if (file_exists($winner_abs)) {
+                    $new_metadata = wp_generate_attachment_metadata(0, $winner_abs);
+                    if (!empty($new_metadata)) {
+                        $wpdb->update(
+                            $attachments_table,
+                            ['metadata' => maybe_serialize($new_metadata)],
+                            [$gd_id_col => $gd_row_id],
+                            ['%s'],
+                            ['%d']
+                        );
+                        echo "    [REBUILD] metadata for " . basename($new_file) . "\n";
+                        $stats['metadata_rebuilt']++;
+                    }
+                }
             }
         }
 
@@ -606,14 +624,83 @@ foreach ($posts as $post) {
         }
     }
 
-    // Check featured image — if it points to a deleted WP attachment, find the winner
-    $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
-    if ($thumbnail_id) {
-        $thumb_exists = get_post($thumbnail_id);
-        if (!$thumb_exists) {
-            $remaining = $remaining ?? get_post_gd_attachments($wpdb, $post_id);
-            if (!empty($remaining)) {
-                $first_file = ltrim($remaining[0]->file, '/');
+    // Rebuild featured image references
+    $remaining = $remaining ?? get_post_gd_attachments($wpdb, $post_id);
+
+    if (!empty($remaining)) {
+        // Ensure featured=1 flag is set on the first GD attachment
+        $has_featured = false;
+        foreach ($remaining as $att) {
+            if (!empty($att->featured) && $att->featured == 1) {
+                $has_featured = true;
+                break;
+            }
+        }
+
+        if (!$has_featured) {
+            $first_id = $remaining[0]->$gd_id_col;
+            if ($dry_run) {
+                echo "  [WOULD UPDATE] Set featured=1 on GD #$first_id\n";
+            } else {
+                $wpdb->update(
+                    $attachments_table,
+                    ['featured' => 1],
+                    [$gd_id_col => $first_id],
+                    ['%d'],
+                    ['%d']
+                );
+                echo "  [UPDATE] Set featured=1 on GD #$first_id\n";
+            }
+            $stats['featured_images_fixed']++;
+        }
+
+        // Update featured_image column in detail table (if it exists)
+        $has_featured_image_col = $wpdb->get_var(
+            "SHOW COLUMNS FROM `$detail_table` LIKE 'featured_image'"
+        );
+
+        if ($has_featured_image_col) {
+            // Find the attachment with featured=1 (or first if none flagged yet)
+            $featured_att = null;
+            foreach ($remaining as $att) {
+                if (!empty($att->featured) && $att->featured == 1) {
+                    $featured_att = $att;
+                    break;
+                }
+            }
+            if (!$featured_att) {
+                $featured_att = $remaining[0];
+            }
+
+            $expected_url = $uploads_baseurl . $featured_att->file;
+            $current_featured = $wpdb->get_var($wpdb->prepare(
+                "SELECT featured_image FROM `$detail_table` WHERE post_id = %d",
+                $post_id
+            ));
+
+            if ($current_featured !== $expected_url) {
+                if ($dry_run) {
+                    echo "  [WOULD UPDATE] featured_image: " . basename($current_featured ?: '(empty)') . " -> " . basename($featured_att->file) . "\n";
+                } else {
+                    $wpdb->update(
+                        $detail_table,
+                        ['featured_image' => $expected_url],
+                        ['post_id' => $post_id],
+                        ['%s'],
+                        ['%d']
+                    );
+                    echo "  [UPDATE] featured_image: " . basename($current_featured ?: '(empty)') . " -> " . basename($featured_att->file) . "\n";
+                }
+            }
+        }
+
+        // Check _thumbnail_id — if it points to a deleted WP attachment, fix it
+        $first_file = ltrim($remaining[0]->file, '/');
+        $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+
+        if ($thumbnail_id) {
+            $thumb_exists = get_post($thumbnail_id);
+            if (!$thumb_exists) {
                 $new_thumb_id = find_wp_attachment_by_file($wpdb, $first_file);
                 if ($new_thumb_id) {
                     if ($dry_run) {
@@ -624,6 +711,18 @@ foreach ($posts as $post) {
                     }
                     $stats['featured_images_fixed']++;
                 }
+            }
+        } elseif (empty($thumbnail_id)) {
+            // No thumbnail set — try to set one
+            $new_thumb_id = find_wp_attachment_by_file($wpdb, $first_file);
+            if ($new_thumb_id) {
+                if ($dry_run) {
+                    echo "  [WOULD UPDATE] _thumbnail_id not set -> WP #$new_thumb_id\n";
+                } else {
+                    update_post_meta($post_id, '_thumbnail_id', $new_thumb_id);
+                    echo "  [UPDATE] _thumbnail_id not set -> WP #$new_thumb_id\n";
+                }
+                $stats['featured_images_fixed']++;
             }
         }
     }
@@ -1007,6 +1106,7 @@ echo "  Posts scanned:             {$stats['posts_scanned']}\n";
 echo "  Posts with revisions:      {$stats['posts_with_dupes']}\n";
 echo "  Already clean (no suffix): {$stats['already_clean']}\n";
 echo "  GD rows " . ($dry_run ? "to update" : "updated") . ":          {$stats['gd_attachments_updated']}\n";
+echo "  Metadata " . ($dry_run ? "to rebuild" : "rebuilt") . ":       {$stats['metadata_rebuilt']}\n";
 echo "  Files " . ($dry_run ? "to delete" : "deleted") . ":            {$stats['files_deleted']}\n";
 echo "  WP attachments cleaned:    {$stats['wp_attachments_cleaned']}\n";
 echo "  Originals missing:         {$stats['originals_missing']}\n";

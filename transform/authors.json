@@ -1,0 +1,30 @@
+[
+  {
+    "author_id": "2",
+    "username": "jennie",
+    "email": "jennie@gotostcroix.com",
+    "first_name": "Jennie",
+    "last_name": "Odgen"
+  },
+  {
+    "author_id": "1",
+    "username": "gotodev",
+    "email": "wendy@gotostcroix.com",
+    "first_name": "Wendy",
+    "last_name": "Solomon"
+  },
+  {
+    "author_id": "1",
+    "username": "gotodev",
+    "email": "team@nomadicsoftware.com",
+    "first_name": "Wendy",
+    "last_name": "Solomon"
+  },
+  {
+    "author_id": "1",
+    "username": "gotodev",
+    "email": "hello@gotostcroix.com",
+    "first_name": "Wendy",
+    "last_name": "Solomon"
+  }
+]
