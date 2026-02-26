@@ -162,12 +162,41 @@ CSV_FILE=Posts-Staging-20260225-transformed.csv \
 images automatically — this script found nothing to do. It exists as a
 safety net.
 
-### For Pages (future)
+### For Pages
 
-Same workflow, different flags:
+Same workflow with different flags. Use `--slugs-file` to filter to a
+specific list of pages (one URL or slug per line):
 
 ```bash
-python transform-posts.py Pages-Export.csv --post-type page --category "" --strip-id
+# Transform — filter by slug list, no category filter
+python transform-posts.py Pages-Export-2026-February-24-1634.csv \
+  --post-type page --category "" --strip-id \
+  --slugs-file pages-to-migrate.txt
+
+# Import via WP All Import, then attach featured images
+CSV_FILE=Pages-Export-2026-February-24-1634-transformed.csv POST_TYPE=page \
+  DRY_RUN=1 wp eval-file import-featured-images.php
+```
+
+### Step 6: Fix page content images
+
+After importing pages, scan for image URLs pointing to the dev host or
+the live site and rewrite them to relative paths. Downloads missing
+images from the live site automatically.
+
+```bash
+DRY_RUN=1 wp eval-file fix-page-images.php
+wp eval-file fix-page-images.php
+```
+
+### Step 7: Register media
+
+After all imports are complete, register any unregistered image files
+in `wp-content/uploads/` with the WordPress Media Library.
+
+```bash
+DRY_RUN=1 wp eval-file register-media.php
+wp eval-file register-media.php
 ```
 
 ---
@@ -226,6 +255,7 @@ Downloads featured image URLs from CSV and attaches as post thumbnails.
 | Variable | Default | Description |
 |---|---|---|
 | `CSV_FILE` | Post-First-Five.csv | Path to transformed CSV |
+| `POST_TYPE` | post | Post type to match (`post` or `page`) |
 | `DRY_RUN` | 0 | Preview without downloading |
 | `POST_SLUG` | | Process single post by slug |
 | `SKIP_EXISTING` | 1 | Skip posts that already have a featured image |
@@ -254,10 +284,34 @@ Filters and cleans blog posts/pages CSV for WP All Import.
 | `--category` | `Blog` | Category filter (comma-separated). `""` = no filter |
 | `--status` | `publish` | Post status filter |
 | `--post-type` | `post` | Post type filter. Use `page` for pages |
+| `--slugs-file` | | Text file of URLs/slugs to include (one per line) |
 | `--strip-id` | off | Clear ID field (creates new posts on import) |
 | `--test` | off | Process first 5 matching rows only |
 | `--not-test` | off | Skip first 5, process the rest |
 | `--dry-run` | off | Report counts without writing files |
+
+### fix-page-images.php
+
+Rewrites image URLs in page content. Converts dev-host absolute URLs to
+relative paths, and downloads live-site images then rewrites to relative
+paths. Handles both `src="..."` attributes and CSS `background-image: url(...)`.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DRY_RUN` | 0 | Preview without modifying |
+| `POST_SLUG` | | Process a single page by slug |
+
+### register-media.php
+
+Scans `wp-content/uploads/` for image files not registered in the
+WordPress Media Library and creates attachment posts for them.
+Skips WP-generated size variants and Elementor cache files.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DRY_RUN` | 0 | Preview without registering |
+| `SUBDIR` | | Only scan a specific subdirectory (e.g., `2024/03`) |
+| `LIMIT` | 0 (all) | Process at most N files (for testing) |
 
 ### authors.json
 
@@ -277,6 +331,20 @@ Edit this file to control how author fields are remapped during transform.
     "author_id": "1",
     "username": "gotodev",
     "email": "wendy@gotostcroix.com",
+    "first_name": "Wendy",
+    "last_name": "Solomon"
+  },
+  {
+    "author_id": "1",
+    "username": "gotodev",
+    "email": "team@nomadicsoftware.com",
+    "first_name": "Wendy",
+    "last_name": "Solomon"
+  },
+  {
+    "author_id": "1",
+    "username": "gotodev",
+    "email": "hello@gotostcroix.com",
     "first_name": "Wendy",
     "last_name": "Solomon"
   }
