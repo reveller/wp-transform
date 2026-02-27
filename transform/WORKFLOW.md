@@ -74,9 +74,30 @@ As of February 27, 2026, the following data migration work is complete:
   tags) in `gd-taxonomy-cpts.json`
 - Full workflow documentation in this file for team reference
 
+### Staging Link Scrub (February 27, 2026)
+- All post content across all CPTs, posts, and pages scrubbed for references
+  to staging-gotostcroix.wordkeeper.net, gotostcroix-dev.wordkeeper.net,
+  www.gotostcroix.com, and gotostcroix.com
+- 862 URLs rewritten to domain-independent relative paths across 174 posts
+  and 38 pages
+- 595 images downloaded from staging/live sites, registered in Media Library
+- 255 internal links (href) converted to relative paths
+- Broken internal links audit completed — 486 broken links identified across
+  all content. Most are GeoDirectory category/archive pages that will resolve
+  automatically once GD permalinks are configured. Full report saved in
+  `broken-links-report.md` — **hold off on distributing until site is near
+  completion**, per Jennie (many links will self-resolve as the site is built out)
+
 ### What Remains
 - **Special Offers:** Wendy will manually enter content
 - **Possible additional Guides subcategories** as content becomes available
+- **Broken links review:** Distribute `broken-links-report.md` to Wendy/Jennie
+  once GeoDirectory permalink structure is configured and site is near completion
+- **Yoast SEO Premium:** License is currently registered to the dev site.
+  Before go-live, change the site in your Yoast account from dev to the
+  live site (gotostcroix.com). Only 1 site per license.
+- **Redirection links:** Update redirects for old URL patterns to new ones,
+  e.g. `/stay` → `/places-to-stay`
 
 ---
 
@@ -366,6 +387,39 @@ Skips WP-generated size variants and Elementor cache files.
 | `DRY_RUN` | 0 | Preview without registering |
 | `SUBDIR` | | Only scan a specific subdirectory (e.g., `2024/03`) |
 | `LIMIT` | 0 (all) | Process at most N files (for testing) |
+
+### scrub-staging-links.php
+
+Scans all post types for references to staging/dev/live hostnames and rewrites
+to relative paths. Downloads images from staging/live sites and registers in
+Media Library before rewriting.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DRY_RUN` | 0 | Preview without modifying |
+| `POST_TYPE` | all | Limit to a single post type |
+| `POST_SLUG` | | Process a single post by slug |
+
+### scrub-staging-retry.php
+
+Retries failed staging image downloads using www.gotostcroix.com as fallback.
+Run after `scrub-staging-links.php` to mop up 404 failures.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DRY_RUN` | 0 | Preview without modifying |
+| `POST_SLUG` | | Process a single post by slug |
+
+### audit-internal-links.php
+
+Scans all post content for internal `href` links and checks whether each
+target resolves to an existing post/page. Reports broken (404) links.
+
+| Variable | Default | Description |
+|---|---|---|
+| `POST_TYPE` | all | Limit to a single post type |
+| `POST_SLUG` | | Process a single post by slug |
+| `VERBOSE` | 0 | Show all links, not just broken ones |
 
 ### authors.json
 
