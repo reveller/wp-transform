@@ -12,6 +12,7 @@
  *
  * Options (set as environment variables):
  *   CPT_NAME=name       CPT display name or post_type slug — optional, repairs all CPTs if omitted
+ *   CATEGORY=name       Filter to posts in a specific GD category (e.g., "Shopping")
  *   DRY_RUN=1           Preview changes without executing (default: 0)
  *   POST_TITLE=title    Filter to a single post title
  *   OUTPUT_FILE=path    Write report to file instead of stdout
@@ -58,6 +59,7 @@ require_once(ABSPATH . 'wp-admin/includes/media.php');
 // Parse environment variables
 // ============================================================
 $cpt_filter = getenv('CPT_NAME') ?: '';
+$category_filter = getenv('CATEGORY') ?: null;
 $dry_run = !empty(getenv('DRY_RUN'));
 $post_title_filter = getenv('POST_TITLE') ?: null;
 $output_file = getenv('OUTPUT_FILE') ?: null;
@@ -92,6 +94,9 @@ echo "Date: " . date('Y-m-d H:i:s') . "\n";
 echo "Uploads: $uploads_basedir\n";
 if ($cpt_filter) {
     echo "CPT filter: $cpt_filter\n";
+}
+if ($category_filter) {
+    echo "Category filter: $category_filter\n";
 }
 if ($post_title_filter) {
     echo "Post filter: $post_title_filter\n";
@@ -147,12 +152,32 @@ if ($post_title_filter) {
     $where_values[] = $post_title_filter;
 }
 
+// Filter by category if CATEGORY is set
+$join_category = '';
+if ($category_filter) {
+    $resolved_type_for_cat = $resolved_type ?? null;
+    if (!$resolved_type_for_cat) {
+        die("Error: CATEGORY filter requires CPT_NAME to be set.\n");
+    }
+    $taxonomy = $resolved_type_for_cat . 'category';
+    $term = get_term_by('name', $category_filter, $taxonomy)
+         ?: get_term_by('slug', $category_filter, $taxonomy);
+    if (!$term) {
+        die("Error: Category \"$category_filter\" not found in taxonomy $taxonomy.\n");
+    }
+    $join_category = "JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id";
+    $where_parts[] = "tr.term_taxonomy_id = %d";
+    $where_values[] = $term->term_taxonomy_id;
+    echo "Category: {$term->name} (ID {$term->term_id}) in $taxonomy\n\n";
+}
+
 $where_parts[] = "p.post_status = 'publish'";
 
 $where_sql = implode(' AND ', $where_parts);
 $query = "SELECT a.*, p.post_title, p.post_type
           FROM $attachments_table a
           JOIN {$wpdb->posts} p ON a.post_id = p.ID
+          $join_category
           WHERE $where_sql
           ORDER BY p.post_title, a.menu_order";
 

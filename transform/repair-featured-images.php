@@ -15,6 +15,7 @@
  *
  * Options (set as environment variables):
  *   CPT_NAME=name       CPT display name or post_type slug — optional, repairs all CPTs if omitted
+ *   CATEGORY=name       Filter to posts in a specific GD category (e.g., "Shopping")
  *   DRY_RUN=1           Preview changes without executing (default: 0)
  *   POST_TITLE=title    Filter to a single post title
  *   OUTPUT_FILE=path    Write report to file instead of stdout
@@ -57,6 +58,7 @@ if (!class_exists('GeoDirectory')) {
 // Parse environment variables
 // ============================================================
 $cpt_filter = getenv('CPT_NAME') ?: '';
+$category_filter = getenv('CATEGORY') ?: null;
 $dry_run = !empty(getenv('DRY_RUN'));
 $post_title_filter = getenv('POST_TITLE') ?: null;
 $output_file = getenv('OUTPUT_FILE') ?: null;
@@ -189,6 +191,23 @@ foreach ($types_to_process as $post_type) {
         'orderby' => 'title',
         'order' => 'ASC',
     ];
+
+    // Filter by category if CATEGORY is set
+    if ($category_filter) {
+        $taxonomy = $post_type . 'category';
+        $term = get_term_by('name', $category_filter, $taxonomy)
+             ?: get_term_by('slug', $category_filter, $taxonomy);
+        if (!$term) {
+            echo "  Note: Category \"$category_filter\" not found in taxonomy $taxonomy — skipping CPT\n\n";
+            continue;
+        }
+        $query_args['tax_query'] = [[
+            'taxonomy' => $taxonomy,
+            'field' => 'term_id',
+            'terms' => $term->term_id,
+        ]];
+        echo "  Category filter: {$term->name} (ID {$term->term_id})\n";
+    }
 
     $posts = get_posts($query_args);
 
